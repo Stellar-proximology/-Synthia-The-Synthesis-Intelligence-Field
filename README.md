@@ -43,4 +43,6 @@ pip install -r requirements.txt
 python ultimate_assistant.py --help
 ```
 Use the `oracle` subcommand to decode punctuation or gate lines, and `build` to generate an app layout.
+The `build` command accepts optional `--uploads` and `--output` paths to control input specs and output directory.
+
 
