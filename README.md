@@ -36,3 +36,12 @@
 1. **Install dependencies**
 ```bash
 pip install -r requirements.txt
+```
+
+2. **Use the combined assistant**
+```bash
+python ultimate_assistant.py decode "Psalm 23:1;"
+python ultimate_assistant.py build
+```
+
+`ultimate_assistant.py` wraps the existing `oracle` and `builder_engine` modules so you can decode punctuation or generate app layouts from a single entry point.
