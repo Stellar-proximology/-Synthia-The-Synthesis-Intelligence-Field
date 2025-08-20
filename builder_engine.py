@@ -2,10 +2,11 @@
 import os
 import logging
 import json
-from parser.spec_extractor import extract_specs
-from parser.layout_organizer import generate_layout
+from spec_extractor import extract_specs
+from layout_organizer import generate_layout
 from jinja2 import Environment, FileSystemLoader
 
+os.makedirs("logs", exist_ok=True)
 logging.basicConfig(filename="logs/builder.log", level=logging.INFO)
 
 def run_builder():
