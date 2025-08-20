@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Synthia Bootstrap Zipper</title>
+<style>
+body { font-family: Arial, sans-serif; background-color: #0b0b12; color: #e9e9ef; text-align: center; padding: 40px; }
+button { background: #6f4df6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+button:hover { filter: brightness(1.1); }
+</style>
+</head>
+<body>
+<h1>🧬 Synthia Bootstrap — HTML Zipper</h1>
+<p>Click below to download the complete Synthia bootstrap project as a ZIP file.</p>
+<button onclick="downloadZip()">Download ZIP</button>
+
+<script>
+function downloadZip() {
+    const b64Data = "UEsDBBQAAAAIAJpID1uOHuehbwAAAJYAAAAMAAAAcGFja2FnZS5qc29uJYxBDsMgDATveYXlc0WjHPsbCpZKKgyy3UhRxN8L5Lizs3stAMg+E74A9WT7JI+PAQ8STYUHX93m1pvaWacaSs6Fd72pBknVtBdXjwOYFxsel0jw9uFLHJ/yY7crKMlB2MU2x5FqL4lDovnQlvYHUEsDBBQAAAAIAJpID1stbAGaCgEAAPMBAAAbAAAAYmFja2VuZC9jeW50aGlhLmNvbmZpZy5qc29uhVHRSsMwFH33K0KeKjRpu1U7ffRBBC0o+F7SNFsvS9KaZtNR9u/etMiGDPaUnHvuveecZLwhhPad8/SRrIpVEQcM1iu3Vk5ZqZ6F9J1DNuUPE2m7Rg2IRwQIDdgGERkJ1aJWGu+0xBqJPsEe3rQw4pbGqCF8GziD43pIPJI6kKcby3hWM9kKz/YZT/lHXr1WJd9sduuwwIifyndbZYP44u6eHOPZQavEZP/cwUuokei9BbYkaAcueehbWCZTC8MUwPItAzt4t5OefeXXheuuOfyP/oQ1EpWAa4S+JGpm6u9kRX0S3ad8cT02ik8O6PRqsu/n7DVY4YIfyhMjwIZh+R3+Zm7koROnj79QSwECFAMUAAAACACaSA9bjh7noW8AAACWAAAADAAAAAAAAAAAAAAApIEAAAAAcGFja2FnZS5qc29uUEsBAhQDFAAAAAgAmkgPWy1sAZoKAQAA8wEAABsAAAAAAAAAAAAAAKSBmQAAAGJhY2tlbmQvY3ludGhpYS5jb25maWcuanNvblBLBQYAAAAAAgACAIMAAADcAQAAAAA=";
+    const byteCharacters = atob(b64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/zip' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = "synthia_project.zip";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+</body>
+</html>
