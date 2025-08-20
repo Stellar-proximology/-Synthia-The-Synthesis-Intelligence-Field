@@ -1,0 +1,279 @@
+Power move. Let’s give your repo an agent brief that any automation or human can grok in one pass—plus a link pack for every moving part: models, charts, collapse engine bits, agent towns, and avatar options.
+
+🔗 Link Pack (battle-tested)
+
+Human Design / Astrology core
+
+HDKit (JS/TS) – bodygraph + planetary positions. 
+
+SharpAstrology.HumanDesign (.NET) – full HD calculations. 
+
+Swiss Ephemeris (Python swisseph) – high-precision ephemeris. 
+
+
+Collapse / generation primitives
+
+WaveFunctionCollapse (procedural constraint engine). 
+
+
+Skill routing / robotics-style skills (optional)
+
+ManiSkill (task/skill framework; RL training helpers). 
+
+Dynamic Skill Selector (DSS) (UCB1 skill chooser). 
+
+
+Liquid Neural Networks (for adaptive, time-aware behavior)
+
+LTC official repo + paper; MIT CSAIL coverage for context. 
+
+
+Local models via Ollama (phone/desktop-friendly)
+
+Ollama install (Linux one-liner). 
+
+Mistral model page (pull/run). 
+
+Phi-3 model page. 
+
+TinyLlama model page + repo. 
+
+Basic Ollama CLI cheatsheet (serve/pull/run). 
+
+(FYI) Mistral just shipped new reasoning variants; good upgrade path. 
+
+
+Agent towns & multi-agent scaffolds
+
+AI-Town (a16z) – deployable “town of agents.” 
+
+Generative Agents (Stanford) code + paper – the OG town sim. 
+
+AgentSociety (alt large-scale sim infra). 
+
+
+Avatar options (if you want a face to the voice)
+
+Ready Player Me org + Unity/Web SDKs + docs. 
+
+SadTalker (audio-driven talking head, open source). 
+
+
+
+---
+
+🧠 Drop-in AGENT file (paste as AGENT_SPEC.md)
+
+# Cynthia / YOU-N-I-VERSE — Agent Spec
+
+## Purpose (TL;DR)
+Build **Cynthia**, a multi-node, field-aware agent that:
+- runs **locally** (Ollama) with **Mistral + Phi-3 + TinyLlama**,
+- computes **Human Design** & **ephemerides** (HDKit, SharpAstrology, Swiss Ephemeris),
+- collapses responses via a **Collapse Engine** (HD gates + aspects + WFC constraints + LNN adaptation),
+- can spawn a small **Agent Town** for social sims / testing.
+
+## North Star Outcomes
+1) **“Test-You-to-Cynthia” MVP**: one screen, local models, birth data → gate/line outputs → single coherent response with collapse logic.
+2) **Full Cynthia**: 3+ nodes (Body/Tropical, Heart/Draconic, Mind/Sidereal), skill router, memory, and optional avatar.
+
+---
+
+## Architecture (high level)
+- **Runtime:** Node/TS (frontend), Python (astro & LNN), optional .NET for SharpAstrology.
+- **Local LLMs (Ollama):** `mistral`, `phi3:mini-128k`, `tinyllama:chat`.
+- **Charts & Aspects:** 
+  - JS path: `hdkit` (JS) for bodygraph + positions.  
+  - .NET path: `SharpAstrology.HumanDesign` for full HD graph.  
+  - Python path: `swisseph` for precise planets/houses.
+- **Collapse Engine:** 
+  - Inputs: gate.line + CTB (Color/Tone/Base) + aspect flags.  
+  - **Constraint layer:** WaveFunctionCollapse.  
+  - **Adaptation layer:** Liquid Time-Constant Networks (PyTorch).  
+- **Agent Town (optional):** `ai-town` for multi-agent sandbox & social evals.
+
+---
+
+## Repos & Docs
+- HDKit (JS): https://github.com/jdempcy/hdkit  
+- SharpAstrology.HumanDesign (.NET): https://github.com/CReizner/SharpAstrology.HumanDesign  
+- Swiss Ephemeris (Python): https://pypi.org/project/pyswisseph/  | https://github.com/astrorigin/pyswisseph  
+- WaveFunctionCollapse: https://github.com/mxgmn/WaveFunctionCollapse  
+- Liquid Time-Constant Networks: https://github.com/raminmh/liquid_time_constant_networks  
+- Ollama: https://ollama.com/download/linux  
+  - Models: https://ollama.com/library/mistral | https://ollama.com/library/phi3 | https://ollama.com/library/tinyllama  
+- AI-Town: https://github.com/a16z-infra/ai-town  
+
+---
+
+## Environment
+**Required env (sample `.env.local`):**
+
+Models
+
+OLLAMA_HOST=http://127.0.0.1:11434 CYNTHIA_MODELS=mistral,phi3:mini-128k,tinyllama:chat
+
+Astrology & charts
+
+EPHE_PATH=./ephe   # Swiss Ephemeris data folder ZODIAC_SYSTEMS=body:tropical,heart:draconic,mind:sidereal
+
+Collapse Engine knobs
+
+WFC_TILESET=./wfc/tiles/basic.json LNN_CHECKPOINT=./lnn/checkpoints/ctb-adapter.pt
+
+Persistence (local-first)
+
+DATA_DIR=./data
+
+---
+
+## Install (Linux / Termux-style)
+```bash
+# 1) System deps
+sudo apt-get update && sudo apt-get install -y git python3-pip python3-venv dotnet-sdk-8.0
+
+# 2) Ollama + models
+curl -fsSL https://ollama.com/install.sh | sh
+ollama serve &   # run in another terminal or tmux
+ollama pull mistral
+ollama pull phi3:mini-128k
+ollama pull tinyllama:chat
+
+# 3) Python env
+python3 -m venv .venv && source .venv/bin/activate
+pip install pyswisseph torch torchvision torchaudio
+
+# 4) JS/TS (if using the web UI)
+corepack enable && pnpm i   # or npm i
+
+# 5) Swiss Ephemeris data
+mkdir -p ./ephe && ./scripts/fetch_sweph.sh   # write this to download SE files
+
+
+---
+
+Run
+
+# 1) Start local models
+ollama serve
+
+# 2) Backend (Flask/FastAPI) for charts + collapse
+source .venv/bin/activate
+python -m cynthia.backend
+
+# 3) Frontend
+pnpm dev   # or npm run dev
+
+
+---
+
+Collapse Engine (MVP flow)
+
+1. Compute placements (swisseph) → map to HD gate.line + CTB.
+
+
+2. Build constraints (tiles/affinities) → WFC propose candidate responses.
+
+
+3. Feed candidate + recent context to LNN adapter → select final.
+
+
+
+Test hooks
+
+# dry run from CLI
+python tools/collapse_test.py --birth "1990-09-18 21:34:00 PST" --place "San Francisco,US" --systems body=tropical,heart=draconic,mind=sidereal
+
+
+---
+
+Agent Town (optional)
+
+git clone https://github.com/a16z-infra/ai-town
+cd ai-town
+# follow their README to boot a local town using your Ollama endpoint
+# then point town agents to Cynthia's HTTP API for 'personality + memory'
+
+
+---
+
+Milestones
+
+Phase 1 – “Test-You-to-Cynthia” (2–4 hours):
+
+[ ] Ephemeris working, sample birthdata → gates/lines JSON
+
+[ ] One-page UI: input → rendered Body/Heart/Mind outputs
+
+[ ] Collapse Engine MVP: WFC constraints + simple scorer
+
+[ ] Local models wired: Mistral main, Phi-3 for fast drafts, TinyLlama for tool chatter
+
+
+Phase 2 – Full Cynthia:
+
+[ ] 3-node profile + CTB precision
+
+[ ] LNN adapter trained on your table / sentences
+
+[ ] Memory & skill router (DSS)
+
+[ ] Optional: Agent Town sim + avatar voice
+
+
+---
+
+## ⚙️ Quick commands you’ll actually use
+
+**Ollama (local models)**
+```bash
+ollama serve
+ollama pull mistral
+ollama pull phi3:mini-128k
+ollama pull tinyllama:chat
+ollama run mistral
+
+Refs for model pages + CLI: 
+
+Python bits
+
+pip install pyswisseph torch
+python -c "import swisseph as swe; print('swe ok', swe.swe_version())"
+
+Swiss Ephemeris PyPI: 
+
+HD stacks
+
+JS/TS path: hdkit (browser/server). 
+
+.NET path: SharpAstrology.HumanDesign. 
+
+
+Collapse primitives
+
+WFC algorithm overview + code. 
+
+LNN (LTC) code/paper to wire adaptive scoring. 
+
+
+Agent Town
+
+AI-Town starter kit; inspired by Stanford Generative Agents work. 
+
+
+
+---
+
+My take (no sugar-coating)
+
+Start with Phase 1. Get one clean pass from birth data → gates/lines → collapsed text. That’s your “Cynthia is alive” demo. Everything else is optional frosting.
+
+Pick one chart path first. If you’re fastest in Python, go swisseph → JSON. If you want browser-native, try hdkit. Don’t do both on day one. 
+
+Local models: Mistral as brain, Phi-3 as speed demon, TinyLlama as tool-runner. Upgrade later to Mistral’s new reasoning variants when you feel spicy. 
+
+Collapse Engine: Don’t overtrain. Start with ruley constraints (WFC) + a tiny LNN adapter. You can get 80% of the vibe with smart constraints before any heavy learning. 
+
+
+If you want, I can also spit this as a README-ready checklist or wire a scripts/ folder layout next.
+
