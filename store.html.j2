@@ -1,0 +1,36 @@
+<!-- Generated Grove Store -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ store_name }} Grove Store</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1a3d; color: #e0e0e0; padding: 20px; }
+        h1 { color: #00d4ff; text-shadow: 0 0 10px #00d4ff; }
+        .store { max-width: 800px; margin: 20px auto; background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; }
+        .assignment { margin: 10px 0; }
+        form { display: flex; flex-direction: column; gap: 10px; }
+        input, button { padding: 8px; border-radius: 4px; border: none; }
+        button { background: #00d4ff; color: #1a1a3d; cursor: pointer; }
+        button:hover { background: #ffffff; }
+    </style>
+</head>
+<body>
+    <h1>{{ store_name }} Grove Store 🌌</h1>
+    <div class="store">
+        <h2>Bot Assignments</h2>
+        {% for assignment in assignments %}
+        <div class="assignment">
+            <p><strong>{{ assignment.user }}</strong> assigned <strong>{{ assignment.bot }}</strong> with {{ assignment.credits }} credits</p>
+        </div>
+        {% endfor %}
+        <h2>Assign a Bot</h2>
+        <form action="/assign_bot" method="POST">
+            <input type="text" name="user" placeholder="User Name" required>
+            <input type="text" name="bot" placeholder="Bot Name" required>
+            <input type="number" name="credits" placeholder="Credits" required>
+            <button type="submit">Assign Bot</button>
+        </form>
+    </div>
+</body>
+</html>

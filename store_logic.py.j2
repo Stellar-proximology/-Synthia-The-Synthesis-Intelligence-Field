@@ -1,0 +1,24 @@
+# Generated Grove Store Logic
+from replit import db
+
+def init_store():
+    if "credits" not in db:
+        db["credits"] = {}
+    if "assignments" not in db:
+        db["assignments"] = []
+
+def assign_bot(user, bot, credits):
+    """Assign a bot to a user with credits."""
+    init_store()
+    if user not in db["credits"]:
+        db["credits"][user] = 1000  # Default starting credits
+    if db["credits"][user] >= credits:
+        db["credits"][user] -= credits
+        db["assignments"].append({"user": user, "bot": bot, "credits": credits})
+        return True
+    return False
+
+# Preloaded assignments for {{ store_name }}
+{% for assignment in assignments %}
+assign_bot("{{ assignment.user }}", "{{ assignment.bot }}", {{ assignment.credits }})
+{% endfor %}

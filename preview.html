@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YOU-N-I-VERSE Builder Preview</title>
+    <style>
+        body { background: #0d0d1a; color: #f0f0f0; font-family: sans-serif; padding: 20px; }
+        h1, h2 { color: #00ffff; }
+        ul { list-style: none; padding: 0; }
+        li { margin: 5px 0; }
+        a { color: #66ffcc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .no-files { color: #888; }
+        #content { white-space: pre-wrap; background: #111122; padding: 15px; border-radius: 5px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>YOU-N-I-VERSE Builder</h1>
+    <h2>Generated Files</h2>
+    <ul>
+        {% if files %}
+            {% for file in files %}
+                <li><a href="javascript:void(0);" onclick="loadFile('{{ file }}')">{{ file }}</a></li>
+            {% endfor %}
+        {% else %}
+            <p class="no-files">No generated files yet. Upload to /uploads/ and trigger a build!</p>
+        {% endif %}
+    </ul>
+    <h2>File Content</h2>
+    <div id="content">Click a file to view its content.</div>
+    <script>
+        async function loadFile(path) {
+            try {
+                const response = await fetch(`/file_content?path=${encodeURIComponent(path)}`);
+                const data = await response.json();
+                document.getElementById('content').innerText = data.content || 'Error loading file.';
+            } catch (error) {
+                document.getElementById('content').innerText = 'Failed to load file: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
