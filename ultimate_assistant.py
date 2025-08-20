@@ -38,15 +38,21 @@ def main() -> None:
         "--gate-line", help="Explicit Gate.Line value like '22.3'"
     )
 
-    subparsers.add_parser(
+    build_parser = subparsers.add_parser(
         "build", help="Run the builder engine to generate app layout"
+    )
+    build_parser.add_argument(
+        "--uploads", default="uploads", help="Directory with spec files"
+    )
+    build_parser.add_argument(
+        "--output", default="generated_app", help="Directory for generated app"
     )
 
     args = parser.parse_args()
     if args.command == "oracle":
         handle_oracle(args.text, args.gate_line)
     elif args.command == "build":
-        run_builder()
+        run_builder(args.uploads, args.output)
 
 
 if __name__ == "__main__":
