@@ -36,3 +36,22 @@
 1. **Install dependencies**
 ```bash
 pip install -r requirements.txt
+```
+
+2. **Run the unified command-line assistant**
+
+```bash
+python ultimate_assistant.py --help
+```
+
+Use `build` to process files in `uploads/` and generate an app skeleton:
+
+```bash
+python ultimate_assistant.py build
+```
+
+Or decode punctuation and gate.line information with the oracle tools:
+
+```bash
+python ultimate_assistant.py oracle "Psalm 23:1;" --gate-line 22.3
+```
