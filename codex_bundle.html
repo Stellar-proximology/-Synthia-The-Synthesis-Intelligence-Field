@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Codex Instructions — Stellar Proximology × YOU-N-I-VERSE</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root { --bg:#0b0f14; --panel:#0f1422; --ink:#e6eefb; --muted:#2b3550; --hi:#7bcfff; }
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto}
+  header{padding:18px 20px;border-bottom:1px solid var(--muted);display:flex;gap:12px;align-items:center}
+  h1{font-size:18px;margin:0}
+  main{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px}
+  .card{background:var(--panel);border:1px solid var(--muted);border-radius:16px;padding:16px;display:flex;flex-direction:column}
+  textarea{width:100%;height:60vh;background:#0a0f1a;color:var(--ink);border:1px solid var(--muted);border-radius:12px;padding:12px;resize:vertical}
+  .row{display:flex;gap:8px;align-items:center;margin-top:12px}
+  button{border:1px solid var(--muted);background:#0b1220;color:var(--ink);padding:10px 14px;border-radius:12px;cursor:pointer}
+  button:hover{border-color:var(--hi)}
+  .tag{font-size:12px;padding:2px 8px;border:1px solid var(--muted);border-radius:999px;background:#0b1220}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}
+</style>
+</head>
+<body>
+  <header>
+    <h1>Codex Instructions Bundle</h1>
+    <span class="tag">Stellar Proximology</span>
+    <span class="tag">YOU-N-I-VERSE</span>
+    <div style="flex:1"></div>
+    <button id="downloadZip">Download ZIP backup</button>
+  </header>
+
+  <main>
+    <section class="card">
+      <h3 style="margin:0 0 8px">stellarproximology/codex-instructions.md</h3>
+      <textarea id="stellar"></textarea>
+      <div class="row mono">Path: <code>stellarproximology/codex-instructions.md</code></div>
+    </section>
+
+    <section class="card">
+      <h3 style="margin:0 0 8px">you-n-i-verse/codex-instructions.md</h3>
+      <textarea id="youniverse"></textarea>
+      <div class="row mono">Path: <code>you-n-i-verse/codex-instructions.md</code></div>
+    </section>
+  </main>
+
+<script type="text/plain" id="stellar-md">
+# 🌌 Codex Build Contract — Stellar Proximology (Research Lab)
+
+**Prime directive:** This repo is the **scientific backbone**. It publishes falsifiable experiments, replication kits, and structured results. It never forks logic that belongs in `/core`.
+
+## Architecture & Directories
+
+/core            # Git submodule or npm/pip package — DO NOT EDIT HERE
+/experiments     # Each experiment = folder with index.md + data + code
+/replication-kits
+/site            # Static site (e.g., Astro/Eleventy) publishing the lab
+/api             # Optional: tiny read-only endpoints surfacing published results
+
+### Experiment Template (required)
+Every experiment folder must include:
+
+- `index.md` — Abstract, hypotheses, methods, materials, procedure, metrics, results, discussion, limitations, next steps
+- `protocol.json` — Machine-readable metadata
+- `run.ipynb` or `run.py` — Reproducible execution script
+- `data/` — Inputs/outputs (versioned)
+- `kit/` — Minimal files required for external replication
+
+> Keep all **interpretation** in `index.md`. Keep **code paths** deterministic. Randomness must be seeded.
+
+---
+
+## Shared Core Integration
+- Import models/mappings from **/core**:
+  - Trinity/Pentacore field math (Mind/Body/Heart/Soul/Spirit)
+  - Codon ↔ Hexagram ↔ Element tables
+  - Sentence & collapse engines (gate-line-color-tone-base-axis-house)
+- Never duplicate `/core`. If you think you need to: you don’t.
+
+**Install (example):**
+```bash
+# If /core is a submodule
+git submodule add <core-repo-url> core
+git submodule update --init --recursive
+
+# Or as a package
+pip install youniverse-core  # or npm i youniverse-core
+```
+
+---
+
+## API Contract (optional)
+
+Read-only, cache-friendly endpoints:
+
+GET /api/experiments → list of experiment metadata
+
+GET /api/experiments/:slug → machine-readable protocol + published results
+
+GET /api/replication-kits/:slug → signed download URL
+
+Response bodies mirror protocol.json and results.json.
+
+---
+
+## Brand & Tone
+
+Academic & surgical. Methods > vibes.
+
+Cite sources. Log limitations. Prefer “we don’t know yet” to hand-waving.
+
+---
+
+## CI/CD
+
+Lint: markdown, JSON schema, notebooks (nbQA)
+
+Build: static site build and integrity checks
+
+Test: execute run.py with fixed seeds; compare checksums
+
+Artifacts: publish kit.zip at build time (user clicks to download; do not commit zips)
+
+---
+
+## Definition of Done
+
+Experiment passes schema validation
+
+run.py reproduces results on CI runner
+
+Site renders abstract + results
+
+Replication kit produced & downloadable
+
+/core dependency up-to-date and pinned
+
+---
+
+## Commit Hygiene
+
+Conventional commits
+
+One experiment per PR
+
+Include replication notes in PR description (hardware, runtime, env, seed)
+
+---
+
+## Quick Start (local)
+
+# 1) Install site deps
+npm i    # or pnpm i / yarn
+
+# 2) Pull core
+git submodule update --init --recursive
+
+# 3) Run local site
+npm run dev
+
+# 4) Validate experiments
+npm run validate:protocols
+</script>
+
+<script type="text/plain" id="youniverse-md">
+# 🎯 Codex Build Contract — YOU-N-I-VERSE (Game Platform)
+
+**Prime directive:** This repo is the **playground**. It renders the science from Stellar as lived experience: charts → sentences → quests → town growth. All domain math/logic lives in **/core**.
+
+## Scope (What belongs here)
+- React/Tailwind/shadcn UI (mobile-first)
+- Avatar + field visualizations (Body/Tropical, Heart/Draconic, Mind/Sidereal)
+- Sentence generator UI (gate-line-color-tone-base-axis-house)
+- Collapse routing & quest assignment **using** `/core` engines
+- Game systems: town builder, resonance challenges, inventory of sentence fragments
+
+## Out of scope
+- Publishing research papers/results (Stellar)
+- Editing or forking `/core` logic (import it)
+
+---
+
+## Architecture & Directories
+
+/core              # Submodule or package — DO NOT EDIT HERE
+/app               # Next.js/React app routes
+/components        # UI building blocks (shadcn/ui)
+/lib               # API clients, persistence, utilities
+/data              # Static seeds (icons, glyph maps)
+/state             # State machines (xstate/zustand) for game/quests
+
+---
+
+## Shared Core Integration
+**Install:**
+```bash
+# Submodule
+git submodule add <core-repo-url> core
+git submodule update --init --recursive
+
+# Or package
+npm i youniverse-core
+```
+
+Use:
+```js
+import { collapse, toSentence, mapChartToCTB } from "@/core/engine";
+import { hexCodonElementMap } from "@/core/mappings";
+```
+
+---
+
+## External Inputs
+
+Swiss Ephemeris (or equivalent) → positions → Gates/Lines → mapChartToCTB
+
+User birth data (optional) → drives chart render + quest seeds
+
+Stellar API (read-only) for published “laws” and experiment-backed parameters
+
+---
+
+## Game Layers (phased)
+
+1. Core Field: chart & avatar, 3-ring node view (Body/Heart/Mind)
+
+2. Resonance Lab: sentence puzzles, resonance challenges, CTB alignment
+
+3. Town Builder: generative agents, buildings unlocked by sentence assembly
+
+> All sentence assembly uses assigned keywords only. No vague metaphors.
+
+---
+
+## UI/UX Standards
+
+Tailwind + shadcn/ui, rounded-2xl, soft shadows, grid layouts
+
+Local Backup: in-app “Download Project Snapshot (.zip)” button
+
+Accessibility: tab order, ARIA roles, prefers-reduced-motion guardrails
+
+---
+
+## State & Persistence
+
+zustand or xstate for deterministic state machines (quests, fragments, towns)
+
+Export/import player state as JSON; encrypt at rest if cloud sync is enabled
+
+---
+
+## Definition of Done
+
+Screens: Landing, Onboarding, Dashboard, Chart, Lab, Town
+
+Sentence → Quest loop wired to /core/collapse
+
+Backup button produces a portable snapshot
+
+E2E smoke via Playwright: onboarding → chart → generate sentence → accept quest
+
+---
+
+## Quick Start (local)
+
+npm i
+git submodule update --init --recursive
+npm run dev
+
+---
+
+## Commit Hygiene
+
+Conventional commits
+
+Include screenshots of new UI flows in PR descriptions
+</script>
+
+<script>
+const stellar = document.getElementById('stellar-md').textContent.trim();
+const youniverse = document.getElementById('youniverse-md').textContent.trim();
+
+document.getElementById('stellar').value = stellar;
+document.getElementById('youniverse').value = youniverse;
+
+document.getElementById('downloadZip').addEventListener('click', () => {
+  const zip = new JSZip();
+  zip.file('stellarproximology/codex-instructions.md', stellar);
+  zip.file('you-n-i-verse/codex-instructions.md', youniverse);
+  zip.generateAsync({type: 'blob'}).then(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'codex-instructions.zip';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</body>
+</html>
