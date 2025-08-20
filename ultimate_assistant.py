@@ -1,4 +1,4 @@
-import argparse
+.import argparse
 import json
 from builder_engine import run_builder
 from oracle import parse_punctuation, get_gate_line_info
