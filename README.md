@@ -36,3 +36,11 @@
 1. **Install dependencies**
 ```bash
 pip install -r requirements.txt
+```
+
+2. **Run the multi-tool assistant**
+```bash
+python ultimate_assistant.py --help
+```
+Use the `oracle` subcommand to decode punctuation or gate lines, and `build` to generate an app layout.
+

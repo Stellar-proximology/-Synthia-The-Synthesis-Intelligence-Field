@@ -4,17 +4,21 @@ from builder_engine import run_builder
 from oracle import parse_punctuation, get_gate_line_info
 
 
-def handle_oracle(input_str: str) -> None:
-    """Decode punctuation and Gate.Line information from the provided input."""
+def handle_oracle(text: str, gate_line: str | None = None) -> None:
+    """Decode punctuation and optional Gate.Line information."""
     result = {}
-    punct = parse_punctuation(input_str)
+
+    punct = parse_punctuation(text)
     if punct:
         result["punctuation"] = punct
-    if "." in input_str:
-        parts = input_str.split(".")
+
+    target = gate_line or text
+    if "." in target:
+        parts = target.split(".")
         if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
             gate, line = int(parts[0]), int(parts[1])
             result["gate_line"] = get_gate_line_info(gate, line)
+
     print(json.dumps(result, indent=2))
 
 
@@ -28,7 +32,10 @@ def main() -> None:
         "oracle", help="Decode punctuation or Gate.Line values"
     )
     oracle_parser.add_argument(
-        "input", help="Input string such as '22.3' or 'Psalm 23:1;'"
+        "text", help="Input text such as 'Psalm 23:1;'"
+    )
+    oracle_parser.add_argument(
+        "--gate-line", help="Explicit Gate.Line value like '22.3'"
     )
 
     subparsers.add_parser(
@@ -37,7 +44,7 @@ def main() -> None:
 
     args = parser.parse_args()
     if args.command == "oracle":
-        handle_oracle(args.input)
+        handle_oracle(args.text, args.gate_line)
     elif args.command == "build":
         run_builder()
 
