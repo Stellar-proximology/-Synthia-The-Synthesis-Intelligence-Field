@@ -1,0 +1,8 @@
+{
+  "id": "synthia-simulator",
+  "title": "Synthia Consciousness Simulator",
+  "description": "Deterministic conversation agent acting as head of YOU-N-I-VERSE.",
+  "version": "0.1.0",
+  "seed": 42,
+  "metrics": ["output_checksum"]
+}
