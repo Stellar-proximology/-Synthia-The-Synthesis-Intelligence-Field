@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sentence Puzzle Generator</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 1em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8em;
+      margin-bottom: 1em;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1em;
+      width: 100%;
+      max-width: 600px;
+    }
+    .block {
+      background: white;
+      border-radius: 12px;
+      padding: 0.5em;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    select {
+      width: 100%;
+      padding: 0.4em;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .button {
+      margin-top: 1.5em;
+      padding: 0.6em 1.2em;
+      font-size: 1em;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .output {
+      margin-top: 1.5em;
+      padding: 1em;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 600px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sentence Puzzle Generator</h1>
+  <div class="container">
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Plane Voice</label><select id="plane"><option>Collective</option><option>Personal</option><option>Tribal</option></select></div>
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Gate</label><select id="gate"><option>Gate 2</option><option>Gate 28</option><option>Gate 64</option></select></div>
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Connector A</label><select id="connA"><option>via</option><option>through</option></select></div>
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Line</label><select id="line"><option>Line 1</option><option>Line 2</option><option>Line 4</option></select></div>
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Connector B</label><select id="connB"><option>in</option><option>with</option></select></div>
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Color</label><select id="color"><option>Red</option><option>Blue</option></select></div>
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Connector C</label><select id="connC"><option>for</option><option>toward</option></select></div>
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Tone</label><select id="tone"><option>Sharp</option><option>Soft</option></select></div>
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Connector D</label><select id="connD"><option>rooted in</option><option>anchored by</option></select></div>
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Base</label><select id="base"><option>Earth</option><option>Water</option></select></div>
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Position</label><select id="position"><option>25° Virgo 5th House</option><option>3° Aries 7th House</option></select></div>
+    <div class="block" style="position: relative;"><svg width="100%" height="10" style="position:absolute;top:-10px;left:0;"><rect width="100%" height="10" fill="#ccc" rx="4" ry="4"/></svg><label>Bind Echo</label><select id="bind"><option>aligning focus within action</option><option>grounding will into form</option></select></div>
+  </div>
+  <button class="button" onclick="generateSentence()">Generate Sentence</button>
+  <div id="output" class="output"></div>
+
+  <script>
+    function generateSentence() {
+      const plane = document.getElementById('plane').value;
+      const gate = document.getElementById('gate').value;
+      const connA = document.getElementById('connA').value;
+      const line = document.getElementById('line').value;
+      const connB = document.getElementById('connB').value;
+      const color = document.getElementById('color').value;
+      const connC = document.getElementById('connC').value;
+      const tone = document.getElementById('tone').value;
+      const connD = document.getElementById('connD').value;
+      const base = document.getElementById('base').value;
+      const position = document.getElementById('position').value;
+      const bind = document.getElementById('bind').value;
+
+      const sentence = `${plane} ${gate} ${connA} ${line}, ${connB} ${color} ${connC} ${tone}, ${connD} ${base}. At ${position}, ${bind}.`;
+      document.getElementById('output').innerText = sentence;
+    }
+  </script>
+</body>
+</html>

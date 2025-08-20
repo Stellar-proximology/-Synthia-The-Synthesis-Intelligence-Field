@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentence Puzzle Generator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    background: #f5f5f5;
+  }
+  .puzzle-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  .puzzle-block {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    min-width: 120px;
+  }
+  select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  #output {
+    margin-top: 20px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-size: 16px;
+  }
+  button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 6px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #45a049;
+  }
+</style>
+</head>
+<body>
+
+<h2>Sentence Puzzle Generator</h2>
+<div class="puzzle-container" id="puzzle-container">
+</div>
+
+<button onclick="generateSentence()">Generate Sentence</button>
+<div id="output">Your sentence will appear here.</div>
+
+<script>
+const puzzleData = [
+  { label: "Plane Voice", options: ["Personal", "Collective", "Tribal"] },
+  { label: "Gate", options: ["Gate 1", "Gate 2", "Gate 3"] },
+  { label: "Connector A", options: ["through", "via", "by way of"] },
+  { label: "Line", options: ["Line 1", "Line 2", "Line 3"] },
+  { label: "Connector B", options: ["in", "with", "among"] },
+  { label: "Color", options: ["Red", "Blue", "Green"] },
+  { label: "Connector C", options: ["for", "as", "like"] },
+  { label: "Tone", options: ["Sharp", "Soft", "Neutral"] },
+  { label: "Connector D", options: ["rooted in", "grounded in", "based on"] },
+  { label: "Base", options: ["Earth", "Water", "Fire"] },
+  { label: "Position", options: ["25° Virgo 5th House", "12° Aries 3rd House"] },
+  { label: "Bind Echo", options: ["reinforcing wisdom within strength", "aligning focus within action"] }
+];
+
+function createPuzzleBlocks() {
+  const container = document.getElementById("puzzle-container");
+  puzzleData.forEach((block, index) => {
+    const div = document.createElement("div");
+    div.className = "puzzle-block";
+    const label = document.createElement("label");
+    label.textContent = block.label;
+    const select = document.createElement("select");
+    block.options.forEach(opt => {
+      const option = document.createElement("option");
+      option.value = opt;
+      option.textContent = opt;
+      select.appendChild(option);
+    });
+    div.appendChild(label);
+    div.appendChild(select);
+    container.appendChild(div);
+  });
+}
+
+function generateSentence() {
+  const selects = document.querySelectorAll(".puzzle-block select");
+  let sentence1 = `${selects[0].value} ${selects[1].value} ${selects[2].value} ${selects[3].value}, ${selects[4].value} ${selects[5].value} ${selects[6].value} ${selects[7].value}, ${selects[8].value} ${selects[9].value}.`;
+  let sentence2 = `At ${selects[10].value}, ${selects[11].value}.`;
+  document.getElementById("output").textContent = sentence1 + " " + sentence2;
+}
+
+createPuzzleBlocks();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CROC Starter Workspace — Blocks ⇄ Code</title>
+<style>
+  :root{--bg:#0f1115;--fg:#e6e6e6;--accent:#8b5cf6;--muted:#94a3b8;--panel:#161a22;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu; }
+  header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #222;background:linear-gradient(180deg,#141825,#0f1115); position:sticky; top:0; z-index:5;}
+  .brand{font-weight:700;letter-spacing:0.4px}
+  .pill{padding:4px 10px;border:1px solid #2a2f3a;border-radius:20px;color:#cbd5e1; background:#111827}
+  .layout{display:grid;grid-template-columns: 1.2fr 1fr; gap:10px; padding:10px;}
+  .card{background:var(--panel);border:1px solid #2a2f3a;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-height:300px;}
+  .card h3{margin:0;padding:10px 12px;border-bottom:1px solid #262c39;background:#131722;font-size:13px; font-weight:600; color:#c7d2fe}
+  .card .body{padding:8px;flex:1;display:flex;flex-direction:column;gap:8px;overflow:auto;}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  textarea, pre{width:100%;min-height:160px;border-radius:10px;background:#0b0f16;color:#cbd5e1;border:1px solid #2a2f3a;padding:10px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono";}
+  button{all:unset;display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #2a2f3a;border-radius:10px;cursor:pointer;color:#e5e7eb;background:#121826}
+  button:hover{border-color:#3b4253}
+  .accent{background:linear-gradient(180deg,#6d28d9,#7c3aed);border-color:#7c3aed;color:white}
+  #workspace{height:560px;width:100%;}
+  .two{display:grid;grid-template-columns:1fr 1fr; gap:8px;}
+  code.badge{background:#0b0f16;border:1px solid #2a2f3a;border-radius:8px;padding:3px 6px;color:#93c5fd}
+  .tiny{font-size:11px;color:#94a3b8}
+  .footer{padding:8px 12px;color:#94a3b8}
+  .filebox{border:1px dashed #394150;border-radius:10px;padding:8px}
+  a.dl{color:#c7d2fe}
+</style>
+<script src="https://unpkg.com/blockly/blockly.min.js"></script>
+</head>
+<body>
+<header>
+  <div class="brand">🟣 CROC — Code ↔ Blocks Round‑trip Compiler (starter)</div>
+  <span class="pill">MVP • React Native (Expo) target</span>
+</header>
+
+<div class="layout">
+  <div class="card">
+    <h3>Blocks (Blockly)</h3>
+    <div class="body">
+      <div id="workspace"></div>
+      <div class="row">
+        <button class="accent" onclick="toIR()">Build IR from Blocks</button>
+        <button onclick="clearWorkspace()">Clear</button>
+        <button onclick="saveBlocks()">Download Blocks XML</button>
+        <input type="file" id="loadBlocks" accept=".xml" />
+      </div>
+      <div class="tiny">Subset supported now: <code class="badge">Button.Click</code> <code class="badge">Label.Text</code> <code class="badge">Web.URL</code> <code class="badge">Web.PostText</code> <code class="badge">WebViewer.GoToUrl</code> <code class="badge">TinyDB.StoreValue</code> <code class="badge">Web.GotText</code> <code class="badge">Web.TimedOut</code></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>IR & Code</h3>
+    <div class="body">
+      <div class="two">
+        <div>
+          <div class="row">
+            <button onclick="genRN()">Generate React Native (TS)</button>
+            <button onclick="downloadFile('ir.json', JSON.stringify(ir,null,2))">Download IR</button>
+          </div>
+          <textarea id="irBox" placeholder="IR JSON will appear here"></textarea>
+        </div>
+        <div>
+          <div class="row">
+            <button class="accent" onclick="fromRN()">Reverse: RN → IR → Blocks</button>
+            <button onclick="downloadFile('App.tsx', document.getElementById('codeBox').value)">Download App.tsx</button>
+          </div>
+          <textarea id="codeBox" placeholder="Generated React Native code will appear here"></textarea>
+        </div>
+      </div>
+      <div class="filebox">
+        <div class="tiny">Tip: keep the <code class="badge">@croc:</code> tags in code so reverse works. Your dev can expand generators & block sets quickly.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="card">
+    <h3>Quick Start Blocks (drop-in)</h3>
+    <div class="body">
+      <div class="row"><button onclick="loadStarter()">Load Example Flow</button></div>
+      <pre class="tiny">
+When <b>ButtonRun.Click</b>:
+ • set <b>Web1.URL</b> ← <i>Codename.Text</i>
+ • WebViewer1.GoToUrl(<i>Web1.WebViewString</i>)
+ • Web1.PostText(<i>CODE_INPUT.Text</i>)
+
+When <b>Web1.GotText</b>:
+ • set <b>Label1.Text</b> ← responseContent
+
+When <b>Web1.TimedOut</b>:
+ • <i>Codename.ShowError</i>(Label1.Text ← Web1.Timeout)
+
+When <b>ButtonSave.Click</b>:
+ • TinyDB1.StoreValue(tag=Codename.Text, value=CODE_INPUT.Text)
+      </pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Downloads & Notes</h3>
+    <div class="body">
+      <p>Use the buttons above to download <b>IR</b> and <b>App.tsx</b>. These are your seed files your builder can extend.</p>
+      <ul class="tiny">
+        <li>Target is React Native (Expo). Create a new Expo app and replace <code>App.tsx</code>.</li>
+        <li>Add more ops by mapping <i>block → IR op → generator</i>. Keep IDs stable.</li>
+        <li>Later: write AIA unzipper & .bky/.scm parsers to auto-import—this file shows the core logic now.</li>
+      </ul>
+      <div>Extra: <a class="dl" href="https://docs.expo.dev/" target="_blank">Expo docs</a> • <a class="dl" href="https://developers.google.com/blockly" target="_blank">Blockly</a></div>
+    </div>
+    <div class="footer">Built for Cynthia by CROC — v0.1</div>
+  </div>
+</div>
+
+<script>
+  // --- Blockly setup & custom blocks (Kodular-like subset) ---
+  const toolboxXml = `
+  <xml id="toolbox" style="display:none">
+    <category name="Events" colour="#f59e0b">
+      <block type="evt_button_click"></block>
+      <block type="evt_web_got_text"></block>
+      <block type="evt_web_timeout"></block>
+    </category>
+    <category name="Web" colour="#8b5cf6">
+      <block type="set_web_url"></block>
+      <block type="web_post_text"></block>
+      <block type="webviewer_goto"></block>
+    </category>
+    <category name="UI" colour="#10b981">
+      <block type="set_label_text"></block>
+      <block type="get_text_of"></block>
+    </category>
+    <category name="DB" colour="#ef4444">
+      <block type="tinydb_store"></block>
+    </category>
+    <category name="Values" colour="#3b82f6">
+      <block type="text"><field name="TEXT"></field></block>
+    </category>
+  </xml>`;
+
+  // Define blocks
+  function defineBlocks(){
+    const jsons = [
+      // Events
+      {"type":"evt_button_click","message0":"when %1.Click do %2","args0":[{"type":"field_input","name":"COMP","text":"ButtonRun1"},{"type":"input_statement","name":"BODY"}],"colour":40},
+      {"type":"evt_web_got_text","message0":"when %1.GotText do set %2.Text to responseContent","args0":[{"type":"field_input","name":"COMP","text":"Web1"},{"type":"field_input","name":"LABEL","text":"Label1"}],"colour":40},
+      {"type":"evt_web_timeout","message0":"when %1.TimedOut do set %2.Text to Timeout","args0":[{"type":"field_input","name":"COMP","text":"Web1"},{"type":"field_input","name":"LABEL","text":"Label1"}],"colour":40},
+      // Actions
+      {"type":"set_web_url","message0":"set %1.URL to %2","args0":[{"type":"field_input","name":"COMP","text":"Web1"},{"type":"input_value","name":"VAL"}],"colour":260},
+      {"type":"web_post_text","message0":"call %1.PostText %2","args0":[{"type":"field_input","name":"COMP","text":"Web1"},{"type":"input_value","name":"VAL"}],"colour":260},
+      {"type":"webviewer_goto","message0":"call %1.GoToUrl %2","args0":[{"type":"field_input","name":"COMP","text":"WebViewer1"},{"type":"input_value","name":"VAL"}],"colour":260},
+      // UI
+      {"type":"set_label_text","message0":"set %1.Text to %2","args0":[{"type":"field_input","name":"COMP","text":"Label1"},{"type":"input_value","name":"VAL"}],"colour":140},
+      {"type":"get_text_of","message0":"%1.Text","args0":[{"type":"field_input","name":"COMP","text":"CODE_INPUT"}],"output":"String","colour":140},
+      // DB
+      {"type":"tinydb_store","message0":"call %1.StoreValue tag %2 value %3","args0":[{"type":"field_input","name":"COMP","text":"TinyDB1"},{"type":"input_value","name":"TAG"},{"type":"input_value","name":"VAL"}],"colour":0}
+    ];
+    jsons.forEach(j => Blockly.Blocks[j.type] = {init:function(){this.jsonInit(j);}});
+    // Simple generators that build an intermediate op list on a virtual stack.
+    Blockly.JavaScript['set_web_url'] = (b)=> `_OP({"op":"web.url","comp":"${b.getFieldValue('COMP')}","value":${Blockly.JavaScript.valueToCode(b,'VAL',Blockly.JavaScript.ORDER_ATOMIC)||'""'}});\n`;
+    Blockly.JavaScript['web_post_text'] = (b)=> `_OP({"op":"web.postText","comp":"${b.getFieldValue('COMP')}","value":${Blockly.JavaScript.valueToCode(b,'VAL',Blockly.JavaScript.ORDER_ATOMIC)||'""'}});\n`;
+    Blockly.JavaScript['webviewer_goto'] = (b)=> `_OP({"op":"webview.go","comp":"${b.getFieldValue('COMP')}","value":${Blockly.JavaScript.valueToCode(b,'VAL',Blockly.JavaScript.ORDER_ATOMIC)||'""'}});\n`;
+    Blockly.JavaScript['set_label_text'] = (b)=> `_OP({"op":"ui.setText","comp":"${b.getFieldValue('COMP')}","value":${Blockly.JavaScript.valueToCode(b,'VAL',Blockly.JavaScript.ORDER_ATOMIC)||'""'}});\n`;
+    Blockly.JavaScript['get_text_of'] = (b)=> `"@TEXT:${b.getFieldValue('COMP')}"`;
+    Blockly.JavaScript['tinydb_store'] = (b)=> `_OP({"op":"db.store","comp":"${b.getFieldValue('COMP')}","tag":${Blockly.JavaScript.valueToCode(b,'TAG',Blockly.JavaScript.ORDER_ATOMIC)||'""'},"value":${Blockly.JavaScript.valueToCode(b,'VAL',Blockly.JavaScript.ORDER_ATOMIC)||'""'}});\n`;
+    // Events produce separate event bodies
+    Blockly.JavaScript['evt_button_click'] = (b)=> {
+      const comp = b.getFieldValue('COMP');
+      const body = Blockly.JavaScript.statementToCode(b,'BODY');
+      return `_EV("${comp}","Click",function(){\n${body}});\n`;
+    };
+    Blockly.JavaScript['evt_web_got_text'] = (b)=> {
+      const comp = b.getFieldValue('COMP'), lbl = b.getFieldValue('LABEL');
+      return `_EV("${comp}","GotText",function(){_OP({"op":"ui.setText","comp":"${lbl}","value":"@RESP"});} );\n`;
+    };
+    Blockly.JavaScript['evt_web_timeout'] = (b)=> {
+      const comp = b.getFieldValue('COMP'), lbl = b.getFieldValue('LABEL');
+      return `_EV("${comp}","TimedOut",function(){_OP({"op":"ui.setText","comp":"${lbl}","value":"@TIMEOUT"});} );\n`;
+    };
+  }
+
+  let workspace, ir={project:{name:"CynthiaMaker",package:"com.you.ni.verse.cynthia",screens:[{name:"Screen1",layout:[],logic:[],services:[]}],assets:[]}};
+
+  function initBlockly(){
+    defineBlocks();
+    workspace = Blockly.inject('workspace', {toolbox: toolboxXml, trashcan:true, theme: Blockly.Themes.Dark});
+  }
+
+  function clearWorkspace(){workspace.clear();}
+
+  // Build IR by executing the codegen that fills an op table grouped by events
+  function toIR(){
+    const code = Blockly.JavaScript.workspaceToCode(workspace);
+    const events = [];
+    let currentEv=null;
+    window._EV = (comp, event, bodyFn)=>{
+      currentEv={id:`evt_${comp}_${event}`,type:"event",component:comp,event:event,body:[]};
+      // Provide helpers that push ops into current event
+      window._OP = (o)=> currentEv.body.push(o);
+      try{ bodyFn(); } finally { events.push(currentEv); currentEv=null; }
+    };
+    window._OP = (o)=> { if(currentEv) currentEv.body.push(o); };
+    eval(code); // runs _EV/_OP pushed from blocks
+    ir.project.screens[0].logic = events;
+    // naive layout seed: infer components we reference
+    const comps = new Set();
+    events.forEach(ev=>ev.body.forEach(op=>{ if(op.comp) comps.add(op.comp); }));
+    comps.add("ButtonRun1"); comps.add("Web1"); comps.add("WebViewer1"); comps.add("Label1"); comps.add("CODE_INPUT"); comps.add("TinyDB1");
+    ir.project.screens[0].layout = Array.from(comps).map(id=>({type:guessType(id), id, props:{}}));
+    document.getElementById('irBox').value = JSON.stringify(ir,null,2);
+  }
+
+  function guessType(id){
+    if (/Label/i.test(id)) return "Label";
+    if (/Button/i.test(id)) return "Button";
+    if (/WebViewer/i.test(id)) return "WebViewer";
+    if (/Web\d*/i.test(id)) return "Web";
+    if (/TinyDB/i.test(id)) return "TinyDB";
+    if (/INPUT|TextBox/i.test(id)) return "TextBox";
+    return "Component";
+  }
+
+  // RN generator from IR (subset)
+  function genRN(){
+    if(!ir.project.screens[0].logic.length){ toIR(); }
+    const s = ir.project.screens[0];
+    const stateDecls = [];
+    const idFor = (id)=> id.replace(/[^A-Za-z0-9_]/g,'');
+    s.layout.forEach(c=>{
+      if(c.type==="Label"){
+        const nm = idFor(c.id);
+        stateDecls.push(`const [${nm}Text, set${cap(nm)}Text] = useState("${c.props?.Text||""}"); // @croc:id=${c.id}`);
+      }
+      if(c.type==="TextBox"){
+        const nm = idFor(c.id);
+        stateDecls.push(`const [${nm}Value, set${cap(nm)}Value] = useState(""); // @croc:id=${c.id}`);
+      }
+    });
+    const evFns = s.logic.map(ev=>emitEvent(ev)).join("\n\n  ");
+
+    const jsx = `
+      <View style={{padding:16, gap:12}}>
+        {/* Minimal auto layout from inferred components */}
+        <TextInput placeholder="CODE_INPUT" value={CODE_INPUTValue} onChangeText={setCODE_INPUTValue} style={{borderWidth:1,borderColor:'#2a2f3a',color:'white',padding:10}} /> {/* @croc:id=CODE_INPUT */}
+        <Button title="Run" onPress={evt_ButtonRun1_Click} /> {/* @croc:id=ButtonRun1 */}
+        <Text>{Label1Text}</Text> {/* @croc:id=Label1 */}
+      </View>
+    `;
+
+    const code = `// App.tsx — generated by CROC
+import React, { useState } from 'react';
+import { View, Text, Button, TextInput } from 'react-native';
+
+export default function App(){
+  ${stateDecls.join("\n  ")}
+
+  ${evFns}
+
+  return (${jsx});
+}
+
+async function croc_http_get(url){ const r = await fetch(url); try{return await r.json();}catch{return await r.text();} }
+async function croc_web_postText(url, text){ const r = await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:String(text)}); try{return await r.json();}catch{return await r.text();} }
+`;
+    document.getElementById('codeBox').value = code;
+  }
+
+  function emitEvent(ev){
+    const lines = ev.body.map(emitOp).join("\n    ");
+    const fn = `evt_${ev.component}_${ev.event}`.replace(/[^A-Za-z0-9_]/g,'');
+    return `async function ${fn}(){ // @croc:event component=${ev.component} name=${ev.event}
+    ${lines}
+  }`;
+  }
+
+  function emitOp(op){
+    if(op.op==="web.url"){
+      if(String(op.value).startsWith('"@TEXT:')){
+        const comp = String(op.value).slice(7,-1);
+        return `const _url = ${comp}Value; // @croc:op=web.url src=${comp}\n      // (held for later ops)`;
+      } else {
+        return `const _url = ${JSON.stringify(op.value)}; // @croc:op=web.url`;
+      }
+    }
+    if(op.op==="web.postText"){
+      const src = strExpr(op.value);
+      return `const _resp = await croc_web_postText(_url, ${src}); // @croc:op=web.postText`;
+    }
+    if(op.op==="ui.setText"){
+      if(op.value==="@RESP"){
+        return `set${cap(op.comp)}Text(String(_resp)); // @croc:op=setProp target=${op.comp} prop=Text src=RESP`;
+      }
+      if(op.value==="@TIMEOUT"){
+        return `set${cap(op.comp)}Text("Timed Out"); // @croc:op=setProp target=${op.comp} prop=Text src=TIMEOUT`;
+      }
+      if(String(op.value).startsWith('"@TEXT:')){
+        const srcComp = String(op.value).slice(7,-1);
+        return `set${cap(op.comp)}Text(${srcComp}Value); // @croc:op=setProp target=${op.comp} prop=Text src=${srcComp}`;
+      }
+      return `set${cap(op.comp)}Text(${JSON.stringify(op.value)}); // @croc:op=setProp target=${op.comp} prop=Text`;
+    }
+    if(op.op==="webview.go"){
+      const v = strExpr(op.value);
+      return `/* @croc:op=webview.go */`;
+    }
+    if(op.op==="db.store"){
+      return `/* @croc:op=db.store tag=${strExpr(op.tag)} */`;
+    }
+    return `/* @croc:op=${op.op} */`;
+  }
+
+  function strExpr(v){
+    if(typeof v === 'string' && v.startsWith('"@TEXT:')){
+      const comp = v.slice(7,-1);
+      return `${comp}Value`;
+    }
+    return JSON.stringify(v);
+  }
+
+  function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  // Reverse: very naive parser using @croc tags.
+  function fromRN(){
+    const code = document.getElementById('codeBox').value;
+    const evRe = /@croc:event component=([^ ]+) name=([^\n]+)\n([\s\S]*?)\n\s*}/g;
+    const bodyOpRe = /@croc:op=([a-zA-Z0-9_.-]+)/g;
+    const events=[];
+    let m;
+    while((m = evRe.exec(code))){
+      const [_, comp, name, body] = m;
+      const ops=[]; let n;
+      while((n = bodyOpRe.exec(body))){ ops.push({tag:n[0],op:n[1]}); }
+      // best-effort rebuild
+      const bod = [];
+      ops.forEach(o=>{
+        if(o.op==="web.url"){ bod.push({op:"web.url",comp:"Web1",value:"@TEXT:CODE_INPUT"}); }
+        else if(o.op==="web.postText"){ bod.push({op:"web.postText",comp:"Web1",value:"@TEXT:CODE_INPUT"}); }
+        else if(o.op==="setProp"){ bod.push({op:"ui.setText",comp:"Label1",value:"@RESP"}); }
+      });
+      events.push({id:`evt_${comp}_${name}`, type:"event", component:comp, event:name, body:bod});
+    }
+    ir.project.screens[0].logic = events;
+    document.getElementById('irBox').value = JSON.stringify(ir,null,2);
+    // rebuild some blocks visually
+    workspace.clear();
+    loadStarterFromIR(events);
+  }
+
+  function loadStarterFromIR(events){
+    const xml = Blockly.utils.xml.createElement('xml');
+    events.forEach(ev=>{
+      if(ev.event==="Click"){
+        const b = workspace.newBlock('evt_button_click'); b.setFieldValue(ev.component,'COMP');
+        // Add a simple chain based on ops we see
+        ev.body.forEach(op=>{
+          const child = opToBlock(op);
+          if(child){ b.getInput('BODY').connection.connect(child.previousConnection); }
+        });
+        b.initSvg(); b.render();
+      }
+      if(ev.event==="GotText"){ const b = workspace.newBlock('evt_web_got_text'); b.setFieldValue(ev.component,'COMP'); b.initSvg(); b.render(); }
+      if(ev.event==="TimedOut"){ const b = workspace.newBlock('evt_web_timeout'); b.setFieldValue(ev.component,'COMP'); b.initSvg(); b.render(); }
+    });
+  }
+
+  function opToBlock(op){
+    if(op.op==="web.url"){ const b = workspace.newBlock('set_web_url'); b.setFieldValue(op.comp || 'Web1','COMP'); const v = workspace.newBlock('get_text_of'); v.setFieldValue('CODE_INPUT','COMP'); v.initSvg(); v.render(); b.getInput('VAL').connection.connect(v.outputConnection); b.initSvg(); b.render(); return b; }
+    if(op.op==="web.postText"){ const b = workspace.newBlock('web_post_text'); b.setFieldValue(op.comp || 'Web1','COMP'); const v = workspace.newBlock('get_text_of'); v.setFieldValue('CODE_INPUT','COMP'); v.initSvg(); v.render(); b.getInput('VAL').connection.connect(v.outputConnection); b.initSvg(); b.render(); return b; }
+    if(op.op==="ui.setText"){ const b = workspace.newBlock('set_label_text'); b.setFieldValue(op.comp || 'Label1','COMP'); const t = workspace.newBlock('text'); t.setFieldValue('response','TEXT'); t.initSvg(); t.render(); b.getInput('VAL').connection.connect(t.outputConnection); b.initSvg(); b.render(); return b; }
+    return null;
+  }
+
+  // Serialization helpers
+  function saveBlocks(){
+    const xml = Blockly.Xml.workspaceToDom(workspace);
+    const text = Blockly.Xml.domToText(xml);
+    downloadFile('blocks.xml', text);
+  }
+  document.getElementById('loadBlocks').addEventListener('change', (e)=>{
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{ workspace.clear(); const xml = Blockly.Xml.textToDom(reader.result); Blockly.Xml.domToWorkspace(xml, workspace); };
+    reader.readAsText(file);
+  });
+
+  function downloadFile(name, content){
+    const blob = new Blob([content], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=name; a.click();
+    setTimeout(()=> URL.revokeObjectURL(url), 500);
+  }
+
+  function loadStarter(){
+    workspace.clear();
+    const xmlText = `
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <block type="evt_button_click" x="20" y="30">
+    <field name="COMP">ButtonRun1</field>
+    <statement name="BODY">
+      <block type="set_web_url">
+        <field name="COMP">Web1</field>
+        <value name="VAL"><block type="get_text_of"><field name="COMP">Codename</field></block></value>
+        <next>
+          <block type="web_post_text">
+            <field name="COMP">Web1</field>
+            <value name="VAL"><block type="get_text_of"><field name="COMP">CODE_INPUT</field></block></value>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="evt_web_got_text" x="20" y="180">
+    <field name="COMP">Web1</field>
+    <field name="LABEL">Label1</field>
+  </block>
+  <block type="evt_web_timeout" x="20" y="260">
+    <field name="COMP">Web1</field>
+    <field name="LABEL">Label1</field>
+  </block>
+  <block type="tinydb_store" x="20" y="340">
+    <field name="COMP">TinyDB1</field>
+  </block>
+</xml>`;
+    const xml = Blockly.Xml.textToDom(xmlText);
+    Blockly.Xml.domToWorkspace(xml, workspace);
+  }
+
+  // init
+  initBlockly();
+</script>
+</body>
+</html>

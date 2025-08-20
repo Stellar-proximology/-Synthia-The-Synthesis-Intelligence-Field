@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Synthia Sentence Generator — Replit Edition</title>
+<style>
+  :root{
+    --bg:#0b0b10; --card:#151520; --ink:#f6f7ff; --muted:#9aa3b2; --accent:#7ee8fa;
+    --pill:#1e1e2a; --good:#baffc9; --warn:#ffdca8;
+    --btn:#1b1b27; --btnh:#242438; --border:#27273b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,Segoe UI,Roboto,Inter,Apple Color Emoji,Segoe UI Emoji}
+  header{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center}
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
+  header .tag{padding:4px 8px;border-radius:999px;background:var(--pill);color:var(--accent);font-size:12px}
+  main{max-width:1100px;margin:0 auto;padding:20px 16px 80px}
+  .row{display:grid;gap:14px;grid-template-columns:1.2fr .8fr}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+  .title{font-size:13px;letter-spacing:.25px;color:var(--muted);margin-bottom:6px}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px}
+  .box{display:flex;flex-direction:column;gap:6px;background:#10101a;border:1px solid var(--border);border-radius:12px;padding:10px}
+  .box label{font-size:12px;color:var(--muted)}
+  .box .value{font-weight:600}
+  select,button,input{font:inherit}
+  select{width:100%;background:#0e0e17;color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:8px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0}
+  .btn{background:var(--btn);border:1px solid var(--border);color:var(--ink);border-radius:10px;padding:10px 12px;cursor:pointer}
+  .btn:hover{background:var(--btnh)}
+  .out{font-size:18px;line-height:1.5;white-space:pre-wrap}
+  .monosmall{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--muted)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--pill);color:var(--accent);font-size:12px;margin-left:6px}
+  .row-narrow{display:grid;gap:12px;grid-template-columns:repeat(3,1fr)}
+  .muted{color:var(--muted)}
+  .good{color:var(--good)}
+  footer{max-width:1100px;margin:0 auto;padding:18px 16px;color:var(--muted)}
+  .hr{height:1px;background:var(--border);margin:14px 0}
+  @media (max-width: 950px){ .row{grid-template-columns:1fr} .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Synthia Sentence Generator</h1><span class="tag">Replit • Web</span>
+</header>
+<main>
+  <div class="row">
+    <!-- Left: Puzzle boxes -->
+    <section class="card">
+      <div class="title">Sentence Puzzle • <span class="muted">tap selectors or press Random</span></div>
+
+      <div class="grid" id="boxes">
+        <!-- plane -->
+        <div class="box">
+          <label>Plane voice</label>
+          <select id="plane"></select>
+        </div>
+        <!-- gate -->
+        <div class="box">
+          <label>Gate</label>
+          <select id="gate"></select>
+        </div>
+        <!-- connA -->
+        <div class="box">
+          <label>Connector A</label>
+          <select id="connA"></select>
+        </div>
+        <!-- line -->
+        <div class="box">
+          <label>Line</label>
+          <select id="line"></select>
+        </div>
+        <!-- connB -->
+        <div class="box">
+          <label>Connector B</label>
+          <select id="connB"></select>
+        </div>
+        <!-- color -->
+        <div class="box">
+          <label>Color</label>
+          <select id="color"></select>
+        </div>
+        <!-- connC -->
+        <div class="box">
+          <label>Connector C</label>
+          <select id="connC"></select>
+        </div>
+        <!-- tone -->
+        <div class="box">
+          <label>Tone</label>
+          <select id="tone"></select>
+        </div>
+        <!-- connD -->
+        <div class="box">
+          <label>Connector D</label>
+          <select id="connD"></select>
+        </div>
+        <!-- base -->
+        <div class="box">
+          <label>Base</label>
+          <select id="base"></select>
+        </div>
+
+        <!-- punctuation -->
+        <div class="box">
+          <label>Punctuation</label>
+          <select id="punct">
+            <option value=".">.</option>
+            <option value="…">…</option>
+          </select>
+        </div>
+        <!-- pos opener -->
+        <div class="box">
+          <label>Position opener</label>
+          <select id="posOpen">
+            <option>At</option>
+            <option>Under</option>
+          </select>
+        </div>
+
+        <!-- position triplet -->
+        <div class="box">
+          <label>Axis</label>
+          <select id="axis"></select>
+        </div>
+        <div class="box">
+          <label>Zodiac</label>
+          <select id="zodiac"></select>
+        </div>
+        <div class="box">
+          <label>House</label>
+          <select id="house"></select>
+        </div>
+
+        <!-- degrees -->
+        <div class="box">
+          <label>Degrees</label>
+          <input id="deg" type="number" min="0" max="359" value="25" style="background:#0e0e17;color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:8px">
+        </div>
+        <div class="box">
+          <label>Minutes</label>
+          <input id="min" type="number" min="0" max="59" value="59" style="background:#0e0e17;color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:8px">
+        </div>
+        <div class="box">
+          <label>Seconds</label>
+          <input id="sec" type="number" min="0" max="59" value="31" style="background:#0e0e17;color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:8px">
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="random">Random</button>
+        <button class="btn" id="reset">Reset</button>
+        <span class="monosmall">Bind auto-updates when Gate/Line change</span>
+      </div>
+    </section>
+
+    <!-- Right: Output -->
+    <section class="card">
+      <div class="title">Output</div>
+      <div id="out" class="out">—</div>
+      <div class="hr"></div>
+      <div class="title">Bind Echo</div>
+      <div id="bindEcho" class="muted monosmall">—</div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="muted">This standalone page stores all dictionaries inline. Drop it into Replit as <code>index.html</code> and hit Run.</div>
+  </footer>
+</main>
+
+<script>
+const DATA = {
+  plane_voice: {
+    personal: "I express",
+    interpersonal: "We express",
+    transpersonal: "It expresses",
+    supra_intrapersonal: "I as All express",
+    omnipersonal: "All as I express"
+  },
+  gates: {
+    "6": "Conflict",
+    "25": "Innocence",
+    "28": "Struggle",
+    "31": "Influence",
+    "59": "Dispersion",
+    "64": "Confusion"
+  },
+  lines: {
+    "1": "Investigation",
+    "2": "Natural",
+    "3": "Trial & Error",
+    "4": "Triumph",
+    "5": "Practical Influence",
+    "6": "Vision"
+  },
+  colors: {
+    "1": "Fear",
+    "2": "Hope",
+    "3": "Desire",
+    "4": "Need",
+    "5": "Guilt",
+    "6": "Innocence"
+  },
+  tones: {
+    "1": "Security",
+    "2": "Uncertainty",
+    "3": "Action",
+    "4": "Meditation",
+    "5": "Judgement",
+    "6": "Acceptance"
+  },
+  bases: {
+    "1": "Survival",
+    "2": "Mind",
+    "3": "Body",
+    "4": "Ego",
+    "5": "Personality"
+  },
+  axis: {
+    "91": "Individual",
+    "92": "Collective",
+    "93": "Interpersonal"
+  },
+  zodiac: {
+    Aries: "Aries", Taurus:"Taurus", Gemini:"Gemini", Cancer:"Cancer",
+    Leo:"Leo", Virgo:"Virgo", Libra:"Libra", Scorpio:"Scorpio",
+    Sagittarius:"Sagittarius", Capricorn:"Capricorn", Aquarius:"Aquarius", Pisces:"Pisces"
+  },
+  houses: {
+    "1":"Identity","2":"Resources","3":"Communication","4":"Home","5":"Self-Expression","6":"Service",
+    "7":"Partnerships","8":"Transformation","9":"Exploration","10":"Public Role","11":"Community","12":"Surrender"
+  },
+  connectors: {
+    a: ["through"],
+    b: ["in","with","by"],
+    c: ["for","as"],
+    d: ["rooted in","grounded in"]
+  }
+};
+
+const els = {};
+["plane","gate","connA","line","connB","color","connC","tone","connD","base",
+ "punct","posOpen","axis","zodiac","house","deg","min","sec"].forEach(id=>els[id]=document.getElementById(id));
+const out = document.getElementById("out");
+const bindEcho = document.getElementById("bindEcho");
+
+function fillSelect(sel, dictOrList, useKeys=true){
+  sel.innerHTML="";
+  if(Array.isArray(dictOrList)){
+    dictOrList.forEach(v=>{
+      const opt=document.createElement("option");
+      opt.value=v; opt.textContent=v;
+      sel.append(opt);
+    });
+  } else {
+    Object.keys(dictOrList).forEach(k=>{
+      const opt=document.createElement("option");
+      opt.value=useKeys? k : dictOrList[k];
+      opt.textContent=dictOrList[k];
+      sel.append(opt);
+    });
+  }
+}
+
+function randomFrom(list){ return list[Math.floor(Math.random()*list.length)]; }
+
+function formatPosition(){
+  const deg=els.deg.value||"0", mi=els.min.value||"0", se=els.sec.value||"0";
+  const ax = DATA.axis[els.axis.value] || "—";
+  const sign = DATA.zodiac[els.zodiac.value] || "—";
+  const house = DATA.houses[els.house.value] || "—";
+  return `${deg}° ${mi}′ ${se}″ • ${ax} • ${sign} • ${house}`;
+}
+
+function buildBind(){
+  const lineTxt = DATA.lines[els.line.value] || "—";
+  const gateTxt = DATA.gates[els.gate.value] || "—";
+  return `reinforcing ${lineTxt} within ${gateTxt}.`;
+}
+
+function render(){
+  const plane = DATA.plane_voice[els.plane.value] || "—";
+  const gate  = DATA.gates[els.gate.value] || "—";
+  const line  = DATA.lines[els.line.value] || "—";
+  const color = DATA.colors[els.color.value] || "—";
+  const tone  = DATA.tones[els.tone.value] || "—";
+  const base  = DATA.bases[els.base.value] || "—";
+
+  const connA = els.connA.value;
+  const connB = els.connB.value;
+  const connC = els.connC.value;
+  const connD = els.connD.value;
+
+  const punct = els.punct.value;
+  const posOpen = els.posOpen.value;
+
+  const s1 = `${plane} ${gate} ${connA} ${line}, ${connB} ${color} ${connC} ${tone}, ${connD} ${base}${punct}`;
+  const s2 = `${posOpen} ${formatPosition()}, ${buildBind()}`;
+  out.textContent = s1 + "\\n" + s2;
+  bindEcho.textContent = buildBind();
+}
+
+function randomize(){
+  // choose random items from each dictionary/list
+  els.plane.value = randomFrom(Object.keys(DATA.plane_voice));
+  els.gate.value  = randomFrom(Object.keys(DATA.gates));
+  els.connA.value = randomFrom(DATA.connectors.a);
+  els.line.value  = randomFrom(Object.keys(DATA.lines));
+  els.connB.value = randomFrom(DATA.connectors.b);
+  els.color.value = randomFrom(Object.keys(DATA.colors));
+  els.connC.value = randomFrom(DATA.connectors.c);
+  els.tone.value  = randomFrom(Object.keys(DATA.tones));
+  els.connD.value = randomFrom(DATA.connectors.d);
+  els.base.value  = randomFrom(Object.keys(DATA.bases));
+
+  els.axis.value  = randomFrom(Object.keys(DATA.axis));
+  els.zodiac.value= randomFrom(Object.keys(DATA.zodiac));
+  els.house.value = randomFrom(Object.keys(DATA.houses));
+
+  els.deg.value = 25; els.min.value = 59; els.sec.value = 31; // default demo values
+  render();
+}
+
+// init
+fillSelect(els.plane,  DATA.plane_voice);
+fillSelect(els.gate,   DATA.gates);
+fillSelect(els.connA,  DATA.connectors.a, false);
+fillSelect(els.line,   DATA.lines);
+fillSelect(els.connB,  DATA.connectors.b, false);
+fillSelect(els.color,  DATA.colors);
+fillSelect(els.connC,  DATA.connectors.c, false);
+fillSelect(els.tone,   DATA.tones);
+fillSelect(els.connD,  DATA.connectors.d, false);
+fillSelect(els.base,   DATA.bases);
+fillSelect(els.axis,   DATA.axis);
+fillSelect(els.zodiac, DATA.zodiac);
+fillSelect(els.house,  DATA.houses);
+
+document.getElementById("random").addEventListener("click", randomize);
+document.getElementById("reset").addEventListener("click", ()=>{
+  els.plane.value="personal"; els.gate.value="6"; els.connA.value="through"; els.line.value="4";
+  els.connB.value="in"; els.color.value="4"; els.connC.value="for"; els.tone.value="4";
+  els.connD.value="rooted in"; els.base.value="2";
+  els.axis.value="92"; els.zodiac.value="Virgo"; els.house.value="5";
+  els.deg.value=25; els.min.value=59; els.sec.value=31;
+  render();
+});
+
+// re-render on any change
+Object.values(els).forEach(el=> el.addEventListener("change", render));
+
+// first view
+document.getElementById("reset").click();
+</script>
+</body>
+</html>
