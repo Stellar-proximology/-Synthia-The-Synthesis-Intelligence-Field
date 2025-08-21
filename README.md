@@ -45,4 +45,12 @@ python ultimate_assistant.py --help
 Use the `oracle` subcommand to decode punctuation or gate lines, and `build` to generate an app layout.
 The `build` command accepts optional `--uploads` and `--output` paths to control input specs and output directory.
 
+3. **Start the web API**
+```bash
+uvicorn assistant_api:app --reload
+```
+The API exposes two endpoints:
+- `POST /build` — trigger the builder engine (fields: `uploads`, `output`)
+- `POST /oracle` — decode punctuation or Gate.Line values (fields: `text`, `gate_line`)
+
 
