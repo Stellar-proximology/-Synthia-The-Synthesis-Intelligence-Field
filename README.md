@@ -42,7 +42,8 @@ pip install -r requirements.txt
 ```bash
 python ultimate_assistant.py --help
 ```
-Use the `oracle` subcommand to decode punctuation or gate lines, and `build` to generate an app layout.
+Use the `oracle` subcommand to decode punctuation or gate lines, `build` to generate an app layout,
+and `chat` to talk with a local TinyLlama model.
 The `build` command accepts optional `--uploads` and `--output` paths to control input specs and output directory.
 
 3. **Start the web API**
