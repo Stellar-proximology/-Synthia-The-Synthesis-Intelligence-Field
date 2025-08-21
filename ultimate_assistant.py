@@ -3,6 +3,11 @@ import json
 from builder_engine import run_builder
 from oracle import parse_punctuation, get_gate_line_info
 
+try:  # Lazy import so non-chat commands work without transformers installed
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+except Exception:  # pragma: no cover - optional dependency
+    AutoModelForCausalLM = AutoTokenizer = None
+
 
 def handle_oracle(text: str, gate_line: str | None = None) -> None:
     """Decode punctuation and optional Gate.Line information."""
@@ -20,6 +25,20 @@ def handle_oracle(text: str, gate_line: str | None = None) -> None:
             result["gate_line"] = get_gate_line_info(gate, line)
 
     print(json.dumps(result, indent=2))
+
+
+def handle_chat(prompt: str, max_tokens: int = 128) -> None:
+    """Generate a TinyLlama response for the provided prompt."""
+    if AutoModelForCausalLM is None or AutoTokenizer is None:
+        raise ImportError("transformers is required for the chat command")
+
+    model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+
+    inputs = tokenizer(prompt, return_tensors="pt")
+    outputs = model.generate(**inputs, max_new_tokens=max_tokens)
+    print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 
 
 def main() -> None:
@@ -48,11 +67,21 @@ def main() -> None:
         "--output", default="generated_app", help="Directory for generated app"
     )
 
+    chat_parser = subparsers.add_parser(
+        "chat", help="Chat with a local TinyLlama model"
+    )
+    chat_parser.add_argument("prompt", help="Prompt text for the model")
+    chat_parser.add_argument(
+        "--max-tokens", type=int, default=128, help="Maximum new tokens to generate"
+    )
+
     args = parser.parse_args()
     if args.command == "oracle":
         handle_oracle(args.text, args.gate_line)
     elif args.command == "build":
         run_builder(args.uploads, args.output)
+    elif args.command == "chat":
+        handle_chat(args.prompt, args.max_tokens)
 
 
 if __name__ == "__main__":
