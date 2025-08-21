@@ -1,0 +1,227 @@
+openapi: 3.0.0
+info:
+  title: Cynthia API
+  version: '0.1.0'
+paths:
+  /v1/resolve-field:
+    post:
+      summary: Compute Body, Mind, and Heart field vectors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ts:
+                  type: string
+                  format: date-time
+                geo:
+                  type: object
+                user_profile_id:
+                  type: string
+      responses:
+        '200':
+          description: Field resolver output
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldResolverOutput'
+  /v1/infer:
+    post:
+      summary: Run model nodes and gather candidate responses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompts:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Candidate set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  candidates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NodeCandidate'
+  /v1/collapse:
+    post:
+      summary: Score and select final response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                candidates:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/NodeCandidate'
+                field:
+                  $ref: '#/components/schemas/FieldResolverOutput'
+                intent:
+                  type: string
+                constraints:
+                  type: object
+      responses:
+        '200':
+          description: Collapse decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollapseDecision'
+  /v1/act:
+    post:
+      summary: Route final text to downstream channels
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                field:
+                  $ref: '#/components/schemas/FieldResolverOutput'
+                mode:
+                  type: string
+      responses:
+        '200':
+          description: Action directives
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  voice:
+                    type: string
+                    nullable: true
+                  avatar:
+                    type: string
+                    nullable: true
+                  task:
+                    type: string
+                    nullable: true
+  /v1/memory/upsert:
+    post:
+      summary: Persist memory data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+  /v1/lab/apply-patch:
+    post:
+      summary: Apply a code patch and run tests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Patch result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  tests:
+                    type: array
+                    items:
+                      type: string
+components:
+  schemas:
+    FieldResolverOutput:
+      type: object
+      properties:
+        field_state:
+          type: object
+          properties:
+            body:
+              $ref: '#/components/schemas/FieldState'
+            mind:
+              $ref: '#/components/schemas/FieldState'
+            heart:
+              $ref: '#/components/schemas/FieldState'
+        aspects:
+          type: array
+          items:
+            type: object
+        phase:
+          type: string
+        confidence:
+          type: number
+    FieldState:
+      type: object
+      properties:
+        zodiac:
+          type: string
+        gates:
+          type: array
+          items:
+            type: string
+        ctb:
+          type: array
+          items:
+            type: integer
+    NodeCandidate:
+      type: object
+      properties:
+        node:
+          type: string
+        text:
+          type: string
+        logprob:
+          type: number
+        checks:
+          type: object
+        features:
+          type: object
+    CollapseDecision:
+      type: object
+      properties:
+        winner:
+          type: string
+        text:
+          type: string
+        scorecard:
+          type: array
+          items:
+            type: object
+            properties:
+              node:
+                type: string
+              score:
+                type: number
+        merge:
+          type: boolean
+        why:
+          type: array
+          items:
+            type: string
