@@ -1,24 +1,11 @@
 import argparse
 import json
-from builder_engine import run_builder
-from oracle import parse_punctuation, get_gate_line_info
-
+import uvicorn
+from assistant_core import build as core_build, decode
 
 def handle_oracle(text: str, gate_line: str | None = None) -> None:
     """Decode punctuation and optional Gate.Line information."""
-    result = {}
-
-    punct = parse_punctuation(text)
-    if punct:
-        result["punctuation"] = punct
-
-    target = gate_line or text
-    if "." in target:
-        parts = target.split(".")
-        if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
-            gate, line = int(parts[0]), int(parts[1])
-            result["gate_line"] = get_gate_line_info(gate, line)
-
+    result = decode(text, gate_line)
     print(json.dumps(result, indent=2))
 
 
@@ -48,11 +35,19 @@ def main() -> None:
         "--output", default="generated_app", help="Directory for generated app"
     )
 
+    server_parser = subparsers.add_parser(
+        "server", help="Run the FastAPI server"
+    )
+    server_parser.add_argument("--host", default="127.0.0.1")
+    server_parser.add_argument("--port", type=int, default=8000)
+
     args = parser.parse_args()
     if args.command == "oracle":
         handle_oracle(args.text, args.gate_line)
     elif args.command == "build":
-        run_builder(args.uploads, args.output)
+        core_build(args.uploads, args.output)
+    elif args.command == "server":
+        uvicorn.run("assistant_api:app", host=args.host, port=args.port)
 
 
 if __name__ == "__main__":
