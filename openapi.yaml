@@ -1,0 +1,242 @@
+openapi: 3.0.3
+info:
+  title: Cynthia API
+  version: 0.1.0
+servers:
+  - url: http://localhost:5000
+paths:
+  /v1/resolve-field:
+    post:
+      summary: Resolve field vectors for the current context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputEnvelope'
+      responses:
+        '200':
+          description: Field Resolver Output
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldResolverOutput'
+  /v1/infer:
+    post:
+      summary: Run node inference and return candidate responses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputEnvelope'
+      responses:
+        '200':
+          description: Candidate response set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  candidates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NodeCandidate'
+  /v1/collapse:
+    post:
+      summary: Collapse candidate responses into a single decision
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                candidates:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/NodeCandidate'
+                field_state:
+                  $ref: '#/components/schemas/FieldState'
+      responses:
+        '200':
+          description: Collapse decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollapseDecision'
+  /v1/act:
+    post:
+      summary: Post-process and route actions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                field_state:
+                  $ref: '#/components/schemas/FieldState'
+      responses:
+        '200':
+          description: Action output
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  voice:
+                    type: string
+                    nullable: true
+                  avatar:
+                    type: string
+                    nullable: true
+                  task:
+                    type: string
+                    nullable: true
+  /v1/memory/upsert:
+    post:
+      summary: Insert or update memory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Status flag
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+  /v1/lab/apply-patch:
+    post:
+      summary: Apply a self-build patch and run tests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Result of patch
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  tests:
+                    type: object
+components:
+  schemas:
+    InputEnvelope:
+      type: object
+      properties:
+        utterance:
+          type: string
+        ts:
+          type: string
+          format: date-time
+        locale:
+          type: string
+        geo:
+          type: object
+          properties:
+            lat:
+              type: number
+            lon:
+              type: number
+        mode:
+          type: string
+        constraints:
+          type: object
+          additionalProperties: true
+        sensors:
+          type: object
+          additionalProperties: true
+        user_profile_id:
+          type: string
+    FieldResolverOutput:
+      type: object
+      properties:
+        field_state:
+          $ref: '#/components/schemas/FieldState'
+        aspects:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        phase:
+          type: string
+          nullable: true
+        confidence:
+          type: number
+    FieldState:
+      type: object
+      properties:
+        body:
+          $ref: '#/components/schemas/FieldEntry'
+        mind:
+          $ref: '#/components/schemas/FieldEntry'
+        heart:
+          $ref: '#/components/schemas/FieldEntry'
+    FieldEntry:
+      type: object
+      properties:
+        zodiac:
+          type: string
+        gates:
+          type: array
+          items:
+            type: string
+        ctb:
+          type: array
+          items:
+            type: integer
+    NodeCandidate:
+      type: object
+      properties:
+        node:
+          type: string
+        text:
+          type: string
+        logprob:
+          type: number
+        checks:
+          type: object
+          additionalProperties: true
+        features:
+          type: object
+          additionalProperties: true
+    CollapseDecision:
+      type: object
+      properties:
+        winner:
+          type: string
+          nullable: true
+        scorecard:
+          type: array
+          items:
+            type: object
+            properties:
+              node:
+                type: string
+              score:
+                type: number
+        merge:
+          type: boolean
+        why:
+          type: array
+          items:
+            type: string
