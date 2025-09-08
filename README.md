@@ -50,8 +50,9 @@ The `build` command accepts optional `--uploads` and `--output` paths to control
 ```bash
 uvicorn assistant_api:app --reload
 ```
-The API exposes two endpoints:
+The API exposes three endpoints:
 - `POST /build` — trigger the builder engine (fields: `uploads`, `output`)
 - `POST /oracle` — decode punctuation or Gate.Line values (fields: `text`, `gate_line`)
+- `POST /chat` — generate a TinyLlama response offline (fields: `prompt`, `max_tokens`)
 
 
