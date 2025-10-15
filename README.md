@@ -38,19 +38,20 @@
 pip install -r requirements.txt
 ```
 
-2. **Run the multi-tool assistant**
+2. **Run the unified command-line assistant**
+
 ```bash
 python ultimate_assistant.py --help
 ```
-Use the `oracle` subcommand to decode punctuation or gate lines, and `build` to generate an app layout.
-The `build` command accepts optional `--uploads` and `--output` paths to control input specs and output directory.
 
-3. **Start the web API**
+Use `build` to process files in `uploads/` and generate an app skeleton:
+
 ```bash
-uvicorn assistant_api:app --reload
+python ultimate_assistant.py build
 ```
-The API exposes two endpoints:
-- `POST /build` — trigger the builder engine (fields: `uploads`, `output`)
-- `POST /oracle` — decode punctuation or Gate.Line values (fields: `text`, `gate_line`)
 
+Or decode punctuation and gate.line information with the oracle tools:
 
+```bash
+python ultimate_assistant.py oracle "Psalm 23:1;" --gate-line 22.3
+```
