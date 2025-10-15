@@ -1,11 +1,13 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Cynthia API
   version: 0.1.0
+servers:
+  - url: http://localhost:5000
 paths:
   /v1/resolve-field:
     post:
-      summary: Compute field vectors for Body, Mind, and Heart
+      summary: Resolve field vectors for the current context
       requestBody:
         required: true
         content:
@@ -43,6 +45,14 @@ paths:
         content:
           application/json:
             schema:
+              type: object
+              properties:
+                candidates:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/NodeCandidate'
+                field_state:
+                  $ref: '#/components/schemas/FieldState'
               $ref: '#/components/schemas/CollapseRequest'
       responses:
         '200':
@@ -50,47 +60,92 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CollapseResponse'
+                $ref: '#/components/schemas/CollapseDecision'
   /v1/act:
     post:
-      summary: Route post-processed text to actions
+      summary: Post-process and route actions
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ActRequest'
+              type: object
+              properties:
+                text:
+                  type: string
+                field_state:
+                  $ref: '#/components/schemas/FieldState'
       responses:
         '200':
-          description: Action outputs
+          description: Action output
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ActResponse'
+                type: object
+                properties:
+                  voice:
+                    type: string
+                    nullable: true
+                  avatar:
+                    type: string
+                    nullable: true
+                  task:
+                    type: string
+                    nullable: true
   /v1/memory/upsert:
     post:
-      summary: Upsert conversation memory
+      summary: Insert or update memory
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MemoryRequest'
+              type: object
+              additionalProperties: true
       responses:
         '200':
-          description: Confirmation of memory update
+          description: Status flag
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OkResponse'
+                type: object
+                properties:
+                  ok:
+                    type: boolean
   /v1/lab/apply-patch:
     post:
-      summary: Apply patch in builder mode
+      summary: Apply a self-build patch and run tests
       requestBody:
         required: true
         content:
           application/json:
             schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Result of patch
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  tests:
+                    type: object
+components:
+  schemas:
+    InputEnvelope:
+      type: object
+      properties:
+        utterance:
+          type: string
+        ts:
+          type: string
+          format: date-time
+        locale:
+          type: string
               $ref: '#/components/schemas/PatchRequest'
       responses:
         '200':
@@ -114,43 +169,43 @@ components:
               type: number
             lon:
               type: number
+        mode:
+          type: string
+        constraints:
+          type: object
+          additionalProperties: true
+        sensors:
+          type: object
+          additionalProperties: true
         user_profile_id:
           type: string
-      required: [ts]
-    FieldVector:
-      type: object
-      properties:
-        zodiac:
-          type: string
-        gates:
-          type: array
-          items:
-            type: string
-        ctb:
-          type: array
-          items:
-            type: integer
-    FieldResponse:
+    FieldResolverOutput:
       type: object
       properties:
         field_state:
-          type: object
-          properties:
-            body:
-              $ref: '#/components/schemas/FieldVector'
-            mind:
-              $ref: '#/components/schemas/FieldVector'
-            heart:
-              $ref: '#/components/schemas/FieldVector'
+          $ref: '#/components/schemas/FieldState'
         aspects:
           type: array
           items:
             type: object
+            additionalProperties: true
+        phase:
+          type: string
+          nullable: true
         phase:
           type: string
         confidence:
           type: number
     FieldState:
+      type: object
+      properties:
+        body:
+          $ref: '#/components/schemas/FieldEntry'
+        mind:
+          $ref: '#/components/schemas/FieldEntry'
+        heart:
+          $ref: '#/components/schemas/FieldEntry'
+    FieldEntry:
       type: object
       properties:
         zodiac:
@@ -172,6 +227,13 @@ components:
           type: string
         logprob:
           type: number
+        checks:
+          type: object
+          additionalProperties: true
+        features:
+          type: object
+          additionalProperties: true
+    CollapseDecision:
       required: [node, text]
     InferResponse:
       type: object
@@ -198,6 +260,7 @@ components:
       properties:
         winner:
           type: string
+          nullable: true
         text:
           type: string
         scorecard:
