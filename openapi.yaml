@@ -1,3 +1,11 @@
+openapi: 3.1.0
+info:
+  title: Cynthia API
+  version: 0.1.0
+paths:
+  /v1/resolve-field:
+    post:
+      summary: Compute field vectors for Body, Mind, and Heart
 openapi: 3.0.3
 info:
   title: Cynthia API
@@ -60,6 +68,10 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/CollapseResponse'
+  /v1/act:
+    post:
+      summary: Route post-processed text to actions
                 $ref: '#/components/schemas/CollapseDecision'
   /v1/act:
     post:
@@ -69,6 +81,17 @@ paths:
         content:
           application/json:
             schema:
+              $ref: '#/components/schemas/ActRequest'
+      responses:
+        '200':
+          description: Action outputs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActResponse'
+  /v1/memory/upsert:
+    post:
+      summary: Upsert conversation memory
               type: object
               properties:
                 text:
@@ -100,6 +123,17 @@ paths:
         content:
           application/json:
             schema:
+              $ref: '#/components/schemas/MemoryRequest'
+      responses:
+        '200':
+          description: Confirmation of memory update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+  /v1/lab/apply-patch:
+    post:
+      summary: Apply patch in builder mode
               type: object
               additionalProperties: true
       responses:
@@ -169,6 +203,34 @@ components:
               type: number
             lon:
               type: number
+        user_profile_id:
+          type: string
+      required: [ts]
+    FieldVector:
+      type: object
+      properties:
+        zodiac:
+          type: string
+        gates:
+          type: array
+          items:
+            type: string
+        ctb:
+          type: array
+          items:
+            type: integer
+    FieldResponse:
+      type: object
+      properties:
+        field_state:
+          type: object
+          properties:
+            body:
+              $ref: '#/components/schemas/FieldVector'
+            mind:
+              $ref: '#/components/schemas/FieldVector'
+            heart:
+              $ref: '#/components/schemas/FieldVector'
         mode:
           type: string
         constraints:
@@ -188,6 +250,15 @@ components:
           type: array
           items:
             type: object
+            properties:
+              pair:
+                type: array
+                items:
+                  type: string
+              type:
+                type: string
+              orb:
+                type: number
             additionalProperties: true
         phase:
           type: string
@@ -196,6 +267,16 @@ components:
           type: string
         confidence:
           type: number
+      required: [field_state]
+    InferRequest:
+      type: object
+      properties:
+        context:
+          type: string
+        field_state:
+          $ref: '#/components/schemas/FieldResponse/properties/field_state'
+      required: [context]
+    Candidate:
     FieldState:
       type: object
       properties:
@@ -278,3 +359,46 @@ components:
           type: array
           items:
             type: string
+    ActRequest:
+      type: object
+      properties:
+        text:
+          type: string
+        field_state:
+          $ref: '#/components/schemas/FieldResponse/properties/field_state'
+        mode:
+          type: string
+    ActResponse:
+      type: object
+      properties:
+        voice:
+          type: string
+        avatar:
+          type: string
+        task:
+          type: string
+    MemoryRequest:
+      type: object
+      properties:
+        event:
+          type: object
+      required: [event]
+    OkResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required: [ok]
+    PatchRequest:
+      type: object
+      properties:
+        patch:
+          type: string
+      required: [patch]
+    PatchResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        tests:
+          type: object
