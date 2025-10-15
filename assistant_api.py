@@ -2,8 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
 
-from builder_engine import run_builder
-from oracle import parse_punctuation, get_gate_line_info
+from assistant_core import build as core_build, decode
 
 app = FastAPI(title="Synthia Assistant")
 
@@ -20,24 +19,19 @@ class OracleRequest(BaseModel):
     gate_line: Optional[str] = None
 
 
+class ChatRequest(BaseModel):
+    """Input for generating a TinyLlama response."""
+    prompt: str
+    max_tokens: int = 128
+
+
 @app.post("/build")
 def build(req: BuildRequest):
     """Run the builder engine on the provided directories."""
-    return run_builder(req.uploads, req.output)
+    return core_build(req.uploads, req.output)
 
 
 @app.post("/oracle")
 def oracle(req: OracleRequest):
     """Decode punctuation and optionally a specific Gate.Line."""
-    result = {}
-    punct = parse_punctuation(req.text)
-    if punct:
-        result["punctuation"] = punct
-
-    target = req.gate_line or req.text
-    if "." in target:
-        parts = target.split(".")
-        if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
-            result["gate_line"] = get_gate_line_info(int(parts[0]), int(parts[1]))
-
-    return result
+    return decode(req.text, req.gate_line)

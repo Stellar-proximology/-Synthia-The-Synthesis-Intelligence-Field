@@ -13,38 +13,33 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InputEnvelope'
+              $ref: '#/components/schemas/FieldRequest'
       responses:
         '200':
-          description: Field Resolver Output
+          description: Field resolver output
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FieldResolverOutput'
+                $ref: '#/components/schemas/FieldResponse'
   /v1/infer:
     post:
-      summary: Run node inference and return candidate responses
+      summary: Generate candidate responses from nodes
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InputEnvelope'
+              $ref: '#/components/schemas/InferRequest'
       responses:
         '200':
-          description: Candidate response set
+          description: Candidate set from nodes
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  candidates:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/NodeCandidate'
+                $ref: '#/components/schemas/InferResponse'
   /v1/collapse:
     post:
-      summary: Collapse candidate responses into a single decision
+      summary: Score and select winning response
       requestBody:
         required: true
         content:
@@ -58,6 +53,7 @@ paths:
                     $ref: '#/components/schemas/NodeCandidate'
                 field_state:
                   $ref: '#/components/schemas/FieldState'
+              $ref: '#/components/schemas/CollapseRequest'
       responses:
         '200':
           description: Collapse decision
@@ -150,6 +146,22 @@ components:
           format: date-time
         locale:
           type: string
+              $ref: '#/components/schemas/PatchRequest'
+      responses:
+        '200':
+          description: Result of patch application
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatchResponse'
+components:
+  schemas:
+    FieldRequest:
+      type: object
+      properties:
+        ts:
+          type: string
+          format: date-time
         geo:
           type: object
           properties:
@@ -180,6 +192,8 @@ components:
         phase:
           type: string
           nullable: true
+        phase:
+          type: string
         confidence:
           type: number
     FieldState:
@@ -220,11 +234,35 @@ components:
           type: object
           additionalProperties: true
     CollapseDecision:
+      required: [node, text]
+    InferResponse:
+      type: object
+      properties:
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candidate'
+    CollapseRequest:
+      type: object
+      properties:
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candidate'
+        field_state:
+          $ref: '#/components/schemas/FieldResponse/properties/field_state'
+        intent:
+          type: string
+        constraints:
+          type: object
+    CollapseResponse:
       type: object
       properties:
         winner:
           type: string
           nullable: true
+        text:
+          type: string
         scorecard:
           type: array
           items:
