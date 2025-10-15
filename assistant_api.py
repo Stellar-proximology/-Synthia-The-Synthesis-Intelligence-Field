@@ -19,6 +19,12 @@ class OracleRequest(BaseModel):
     gate_line: Optional[str] = None
 
 
+class ChatRequest(BaseModel):
+    """Input for generating a TinyLlama response."""
+    prompt: str
+    max_tokens: int = 128
+
+
 @app.post("/build")
 def build(req: BuildRequest):
     """Run the builder engine on the provided directories."""
