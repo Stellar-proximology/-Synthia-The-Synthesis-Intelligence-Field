@@ -1,174 +1,147 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
   title: Cynthia API
-  version: '0.1.0'
+  version: 0.1.0
 paths:
   /v1/resolve-field:
     post:
-      summary: Compute Body, Mind, and Heart field vectors
+      summary: Compute field vectors for Body, Mind, and Heart
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                ts:
-                  type: string
-                  format: date-time
-                geo:
-                  type: object
-                user_profile_id:
-                  type: string
+              $ref: '#/components/schemas/FieldRequest'
       responses:
         '200':
           description: Field resolver output
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FieldResolverOutput'
+                $ref: '#/components/schemas/FieldResponse'
   /v1/infer:
     post:
-      summary: Run model nodes and gather candidate responses
+      summary: Generate candidate responses from nodes
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                prompts:
-                  type: array
-                  items:
-                    type: string
+              $ref: '#/components/schemas/InferRequest'
       responses:
         '200':
-          description: Candidate set
+          description: Candidate set from nodes
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  candidates:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/NodeCandidate'
+                $ref: '#/components/schemas/InferResponse'
   /v1/collapse:
     post:
-      summary: Score and select final response
+      summary: Score and select winning response
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                candidates:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/NodeCandidate'
-                field:
-                  $ref: '#/components/schemas/FieldResolverOutput'
-                intent:
-                  type: string
-                constraints:
-                  type: object
+              $ref: '#/components/schemas/CollapseRequest'
       responses:
         '200':
           description: Collapse decision
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CollapseDecision'
+                $ref: '#/components/schemas/CollapseResponse'
   /v1/act:
     post:
-      summary: Route final text to downstream channels
+      summary: Route post-processed text to actions
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                text:
-                  type: string
-                field:
-                  $ref: '#/components/schemas/FieldResolverOutput'
-                mode:
-                  type: string
+              $ref: '#/components/schemas/ActRequest'
       responses:
         '200':
-          description: Action directives
+          description: Action outputs
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  voice:
-                    type: string
-                    nullable: true
-                  avatar:
-                    type: string
-                    nullable: true
-                  task:
-                    type: string
-                    nullable: true
+                $ref: '#/components/schemas/ActResponse'
   /v1/memory/upsert:
     post:
-      summary: Persist memory data
+      summary: Upsert conversation memory
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/MemoryRequest'
       responses:
         '200':
-          description: Status
+          description: Confirmation of memory update
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok:
-                    type: boolean
+                $ref: '#/components/schemas/OkResponse'
   /v1/lab/apply-patch:
     post:
-      summary: Apply a code patch and run tests
+      summary: Apply patch in builder mode
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/PatchRequest'
       responses:
         '200':
-          description: Patch result
+          description: Result of patch application
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok:
-                    type: boolean
-                  tests:
-                    type: array
-                    items:
-                      type: string
+                $ref: '#/components/schemas/PatchResponse'
 components:
   schemas:
-    FieldResolverOutput:
+    FieldRequest:
+      type: object
+      properties:
+        ts:
+          type: string
+          format: date-time
+        geo:
+          type: object
+          properties:
+            lat:
+              type: number
+            lon:
+              type: number
+        user_profile_id:
+          type: string
+      required: [ts]
+    FieldVector:
+      type: object
+      properties:
+        zodiac:
+          type: string
+        gates:
+          type: array
+          items:
+            type: string
+        ctb:
+          type: array
+          items:
+            type: integer
+    FieldResponse:
       type: object
       properties:
         field_state:
           type: object
           properties:
             body:
-              $ref: '#/components/schemas/FieldState'
+              $ref: '#/components/schemas/FieldVector'
             mind:
-              $ref: '#/components/schemas/FieldState'
+              $ref: '#/components/schemas/FieldVector'
             heart:
-              $ref: '#/components/schemas/FieldState'
+              $ref: '#/components/schemas/FieldVector'
         aspects:
           type: array
           items:
@@ -199,11 +172,28 @@ components:
           type: string
         logprob:
           type: number
-        checks:
+      required: [node, text]
+    InferResponse:
+      type: object
+      properties:
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candidate'
+    CollapseRequest:
+      type: object
+      properties:
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candidate'
+        field_state:
+          $ref: '#/components/schemas/FieldResponse/properties/field_state'
+        intent:
+          type: string
+        constraints:
           type: object
-        features:
-          type: object
-    CollapseDecision:
+    CollapseResponse:
       type: object
       properties:
         winner:
