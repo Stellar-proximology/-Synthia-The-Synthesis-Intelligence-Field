@@ -42,15 +42,17 @@ pip install -r requirements.txt
 ```bash
 python ultimate_assistant.py --help
 ```
-Use the `oracle` subcommand to decode punctuation or gate lines, and `build` to generate an app layout.
+Use the `oracle` subcommand to decode punctuation or gate lines, `build` to generate an app layout,
+and `chat` to talk with a local TinyLlama model.
 The `build` command accepts optional `--uploads` and `--output` paths to control input specs and output directory.
 
 3. **Start the web API**
 ```bash
 uvicorn assistant_api:app --reload
 ```
-The API exposes two endpoints:
+The API exposes three endpoints:
 - `POST /build` — trigger the builder engine (fields: `uploads`, `output`)
 - `POST /oracle` — decode punctuation or Gate.Line values (fields: `text`, `gate_line`)
+- `POST /chat` — generate a TinyLlama response offline (fields: `prompt`, `max_tokens`)
 
 

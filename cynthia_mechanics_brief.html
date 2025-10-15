@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cynthia — Mechanics Brief</title>
+<style>
+  :root{--bg:#0b0f14;--ink:#e6eefb;--mut:#9fb3c8;--card:#0f1522;--acc:#7bcfff;--ok:#39d98a;--warn:#ffd166;}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 ui-sans-serif,system-ui,Segoe UI,Roboto}
+  .wrap{max-width:980px;margin:0 auto;padding:28px}
+  h1,h2,h3{margin:16px 0 8px} h1{font-size:28px} h2{font-size:20px;color:var(--acc)} h3{font-size:16px;color:var(--mut)}
+  .card{background:var(--card);border:1px solid #1c2338;border-radius:14px;padding:16px;margin:12px 0}
+  code,pre{background:#0b1120;border:1px solid #111a2c;border-radius:10px;padding:12px;display:block;overflow:auto}
+  .grid{display:grid;gap:12px} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tag{display:inline-block;padding:2px 8px;border:1px solid #22314f;border-radius:999px;margin-right:6px;color:var(--mut)}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .badge{font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Cynthia — Mechanics Brief</h1>
+  <div class="card"><span class="tag">Multi-node</span><span class="tag">Field-aware</span><span class="tag">Collapse Engine</span></div>
+
+  <h2>0) One-line mental model</h2>
+  <div class="card">Inputs → Normalize → <b>Field Resolver</b> (Mind/Body/Heart) → <b>Node Orchestrator</b> → <b>Collapse Engine</b> → <b>Action Layer</b> → Learn.</div>
+
+  <h2>1) Dataflow</h2>
+  <pre><code>User I/O ──► Perception ─┬─► Context ─┬─► Orchestrator ─┬─► Collapse ─┬─► Action
+Sensors/Ephemeris ────────┘             └─► Field Resolver   │             └─► Voice/Avatar/Tasks
+                                                           Candidate Set</code></pre>
+
+  <h2>2) Core loops</h2>
+  <div class="grid g2">
+    <div class="card"><h3>A. Perception</h3><p>Normalize input, detect intent, build Conversation State.</p></div>
+    <div class="card"><h3>B. Field Resolver</h3><p>Compute Body(Tropical), Mind(Sidereal), Heart(Draconic), aspects, CTB.</p></div>
+    <div class="card"><h3>C. Orchestrator</h3><p>3–9 nodes; field-weighted prompts; gather candidates.</p></div>
+    <div class="card"><h3>D. Collapse</h3><p>Score/merge; emit trace of why-winner.</p></div>
+    <div class="card"><h3>E. Action</h3><p>Strict field sentence → Voice/Avatar/Tasks/Mem.</p></div>
+    <div class="card"><h3>F. Learn</h3><p>Log, feedback, optional self-build patching.</p></div>
+  </div>
+
+  <h2>3) Collapse scoring</h2>
+  <pre><code>score = α*FieldRes + β*TaskFit + γ*Truth + δ*Format + ε*History - κ*RedFlags</code></pre>
+  <div class="card"><b>Defaults:</b> α=.30 β=.25 γ=.20 δ=.15 ε=.10 κ=.40 (tunable)</div>
+
+  <h2>4) Contracts</h2>
+  <h3>Input</h3>
+  <pre><code>{
+  "utterance":"draft my field sentence for today",
+  "ts":"2025-08-21T11:07:00-07:00","locale":"en-US",
+  "geo":{"lat":37.7749,"lon":-122.4194},"mode":"Soft",
+  "constraints":{"format":"strict_field_sentence","max_tokens":220}
+}</code></pre>
+  <h3>Field Resolver</h3>
+  <pre><code>{
+  "field_state":{
+    "body":{"zodiac":"tropical","gates":["38.4","39.2"],"ctb":[3,2,5]},
+    "mind":{"zodiac":"sidereal","gates":["62.5","57.1"],"ctb":[5,1,2]},
+    "heart":{"zodiac":"draconic","gates":["27.3","28.6"],"ctb":[2,6,1]}
+  },
+  "aspects":[{"pair":["Sun","Mars"],"type":"square","orb":1.2}],
+  "confidence":0.86
+}</code></pre>
+
+  <h2>5) Modules</h2>
+  <div class="card">
+    <ul>
+      <li>Perception: ASR, clean, intent</li>
+      <li>Field Resolver: Swiss Ephem + HD (3 zodiacs, gates, CTB, aspects)</li>
+      <li>Prompt Composer: field-weighted system/tool prompts</li>
+      <li>Node Orchestrator: local models first; timeouts</li>
+      <li>Collapse Engine: score/merge/trace</li>
+      <li>Sentence Generator: strict assigned language (gate.line, CTB, axis, house, element)</li>
+      <li>Action Layer: TTS, avatar state, tasks</li>
+      <li>Memory/Telemetry: features, audits</li>
+      <li>Self-Builder: code patches/tests</li>
+    </ul>
+  </div>
+
+  <h2>6) API (minimal)</h2>
+  <pre><code>POST /v1/resolve-field   → field_state
+POST /v1/infer           → candidates[]
+POST /v1/collapse        → decision
+POST /v1/act             → voice/avatar/task
+POST /v1/memory/upsert   → ok
+POST /v1/lab/apply-patch → ok, tests</code></pre>
+
+  <h2>7) Loop</h2>
+  <pre><code>tick → perceive → resolve_field → compose → orchestrate → collapse → postprocess → act → learn</code></pre>
+
+  <h2>8) Quality gates</h2>
+  <div class="card">
+    <span class="badge ok">Strict schema</span> · <span class="badge ok">Traceability</span> ·
+    <span class="badge ok">Fallbacks</span> · <span class="badge ok">Latency SLO</span>
+  </div>
+</div>
+</body>
+</html>

@@ -4,6 +4,13 @@ from typing import Optional
 
 from assistant_core import build as core_build, decode
 
+try:  # Lazy import so non-chat routes work without transformers installed
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+except Exception:  # pragma: no cover - optional dependency
+    AutoModelForCausalLM = AutoTokenizer = None
+
+_model = _tokenizer = None
+
 app = FastAPI(title="Synthia Assistant")
 
 
@@ -17,6 +24,12 @@ class OracleRequest(BaseModel):
     """Payload for decoding punctuation and gate/line information."""
     text: str
     gate_line: Optional[str] = None
+
+
+class ChatRequest(BaseModel):
+    """Input for generating a TinyLlama response."""
+    prompt: str
+    max_tokens: int = 128
 
 
 @app.post("/build")

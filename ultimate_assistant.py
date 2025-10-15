@@ -9,6 +9,20 @@ def handle_oracle(text: str, gate_line: str | None = None) -> None:
     print(json.dumps(result, indent=2))
 
 
+def handle_chat(prompt: str, max_tokens: int = 128) -> None:
+    """Generate a TinyLlama response for the provided prompt."""
+    if AutoModelForCausalLM is None or AutoTokenizer is None:
+        raise ImportError("transformers is required for the chat command")
+
+    model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+
+    inputs = tokenizer(prompt, return_tensors="pt")
+    outputs = model.generate(**inputs, max_new_tokens=max_tokens)
+    print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Unified interface for builder engine and oracle tools"
