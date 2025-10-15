@@ -1,8 +1,24 @@
 
 from jinja2 import Environment, FileSystemLoader
+from pathlib import Path
 import os
 
-env = Environment(loader=FileSystemLoader("universe_builder/templates"))
+# Find a usable template directory. Original projects stored templates in
+# ``universe_builder/templates``, but many repository copies keep the ``*.j2``
+# files alongside this module.  We check several locations and fall back to the
+# current directory so the builder doesn't crash when templates move.
+_CANDIDATE_DIRS = [
+    Path("universe_builder/templates"),            # legacy location
+    Path(__file__).resolve().parent / "templates",  # sibling ``templates`` folder
+    Path(__file__).resolve().parent,                # repo root with loose templates
+]
+
+for _path in _CANDIDATE_DIRS:
+    if _path.exists():
+        env = Environment(loader=FileSystemLoader(str(_path)))
+        break
+else:  # pragma: no cover - defensive fallback
+    env = Environment(loader=FileSystemLoader("."))
 
 def generate_layout(specs):
     layout = {
