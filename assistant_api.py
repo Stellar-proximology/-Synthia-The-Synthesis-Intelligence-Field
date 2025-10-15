@@ -4,13 +4,6 @@ from typing import Optional
 
 from assistant_core import build as core_build, decode
 
-try:  # Lazy import so non-chat routes work without transformers installed
-    from transformers import AutoModelForCausalLM, AutoTokenizer
-except Exception:  # pragma: no cover - optional dependency
-    AutoModelForCausalLM = AutoTokenizer = None
-
-_model = _tokenizer = None
-
 app = FastAPI(title="Synthia Assistant")
 
 
