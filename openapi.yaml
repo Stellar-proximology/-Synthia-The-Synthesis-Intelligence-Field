@@ -1,61 +1,53 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
   title: Cynthia API
-  version: '0.1.0'
+  version: 0.1.0
 paths:
   /v1/resolve-field:
     post:
-      summary: Compute Body, Mind, and Heart field vectors
+      summary: Compute field vectors for Body, Mind, and Heart
+openapi: 3.0.3
+info:
+  title: Cynthia API
+  version: 0.1.0
+servers:
+  - url: http://localhost:5000
+paths:
+  /v1/resolve-field:
+    post:
+      summary: Resolve field vectors for the current context
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                ts:
-                  type: string
-                  format: date-time
-                geo:
-                  type: object
-                user_profile_id:
-                  type: string
+              $ref: '#/components/schemas/FieldRequest'
       responses:
         '200':
           description: Field resolver output
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FieldResolverOutput'
+                $ref: '#/components/schemas/FieldResponse'
   /v1/infer:
     post:
-      summary: Run model nodes and gather candidate responses
+      summary: Generate candidate responses from nodes
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                prompts:
-                  type: array
-                  items:
-                    type: string
+              $ref: '#/components/schemas/InferRequest'
       responses:
         '200':
-          description: Candidate set
+          description: Candidate set from nodes
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  candidates:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/NodeCandidate'
+                $ref: '#/components/schemas/InferResponse'
   /v1/collapse:
     post:
-      summary: Score and select final response
+      summary: Score and select winning response
       requestBody:
         required: true
         content:
@@ -67,38 +59,48 @@ paths:
                   type: array
                   items:
                     $ref: '#/components/schemas/NodeCandidate'
-                field:
-                  $ref: '#/components/schemas/FieldResolverOutput'
-                intent:
-                  type: string
-                constraints:
-                  type: object
+                field_state:
+                  $ref: '#/components/schemas/FieldState'
+              $ref: '#/components/schemas/CollapseRequest'
       responses:
         '200':
           description: Collapse decision
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/CollapseResponse'
+  /v1/act:
+    post:
+      summary: Route post-processed text to actions
                 $ref: '#/components/schemas/CollapseDecision'
   /v1/act:
     post:
-      summary: Route final text to downstream channels
+      summary: Post-process and route actions
       requestBody:
         required: true
         content:
           application/json:
             schema:
+              $ref: '#/components/schemas/ActRequest'
+      responses:
+        '200':
+          description: Action outputs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActResponse'
+  /v1/memory/upsert:
+    post:
+      summary: Upsert conversation memory
               type: object
               properties:
                 text:
                   type: string
-                field:
-                  $ref: '#/components/schemas/FieldResolverOutput'
-                mode:
-                  type: string
+                field_state:
+                  $ref: '#/components/schemas/FieldState'
       responses:
         '200':
-          description: Action directives
+          description: Action output
           content:
             application/json:
               schema:
@@ -115,16 +117,28 @@ paths:
                     nullable: true
   /v1/memory/upsert:
     post:
-      summary: Persist memory data
+      summary: Insert or update memory
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
+              $ref: '#/components/schemas/MemoryRequest'
       responses:
         '200':
-          description: Status
+          description: Confirmation of memory update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+  /v1/lab/apply-patch:
+    post:
+      summary: Apply patch in builder mode
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Status flag
           content:
             application/json:
               schema:
@@ -134,16 +148,17 @@ paths:
                     type: boolean
   /v1/lab/apply-patch:
     post:
-      summary: Apply a code patch and run tests
+      summary: Apply a self-build patch and run tests
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              additionalProperties: true
       responses:
         '200':
-          description: Patch result
+          description: Result of patch
           content:
             application/json:
               schema:
@@ -152,32 +167,126 @@ paths:
                   ok:
                     type: boolean
                   tests:
-                    type: array
-                    items:
-                      type: string
+                    type: object
 components:
   schemas:
-    FieldResolverOutput:
+    InputEnvelope:
+      type: object
+      properties:
+        utterance:
+          type: string
+        ts:
+          type: string
+          format: date-time
+        locale:
+          type: string
+              $ref: '#/components/schemas/PatchRequest'
+      responses:
+        '200':
+          description: Result of patch application
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatchResponse'
+components:
+  schemas:
+    FieldRequest:
+      type: object
+      properties:
+        ts:
+          type: string
+          format: date-time
+        geo:
+          type: object
+          properties:
+            lat:
+              type: number
+            lon:
+              type: number
+        user_profile_id:
+          type: string
+      required: [ts]
+    FieldVector:
+      type: object
+      properties:
+        zodiac:
+          type: string
+        gates:
+          type: array
+          items:
+            type: string
+        ctb:
+          type: array
+          items:
+            type: integer
+    FieldResponse:
       type: object
       properties:
         field_state:
           type: object
           properties:
             body:
-              $ref: '#/components/schemas/FieldState'
+              $ref: '#/components/schemas/FieldVector'
             mind:
-              $ref: '#/components/schemas/FieldState'
+              $ref: '#/components/schemas/FieldVector'
             heart:
-              $ref: '#/components/schemas/FieldState'
+              $ref: '#/components/schemas/FieldVector'
+        mode:
+          type: string
+        constraints:
+          type: object
+          additionalProperties: true
+        sensors:
+          type: object
+          additionalProperties: true
+        user_profile_id:
+          type: string
+    FieldResolverOutput:
+      type: object
+      properties:
+        field_state:
+          $ref: '#/components/schemas/FieldState'
         aspects:
           type: array
           items:
             type: object
+            properties:
+              pair:
+                type: array
+                items:
+                  type: string
+              type:
+                type: string
+              orb:
+                type: number
+            additionalProperties: true
+        phase:
+          type: string
+          nullable: true
         phase:
           type: string
         confidence:
           type: number
+      required: [field_state]
+    InferRequest:
+      type: object
+      properties:
+        context:
+          type: string
+        field_state:
+          $ref: '#/components/schemas/FieldResponse/properties/field_state'
+      required: [context]
+    Candidate:
     FieldState:
+      type: object
+      properties:
+        body:
+          $ref: '#/components/schemas/FieldEntry'
+        mind:
+          $ref: '#/components/schemas/FieldEntry'
+        heart:
+          $ref: '#/components/schemas/FieldEntry'
+    FieldEntry:
       type: object
       properties:
         zodiac:
@@ -201,13 +310,38 @@ components:
           type: number
         checks:
           type: object
+          additionalProperties: true
         features:
           type: object
+          additionalProperties: true
     CollapseDecision:
+      required: [node, text]
+    InferResponse:
+      type: object
+      properties:
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candidate'
+    CollapseRequest:
+      type: object
+      properties:
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candidate'
+        field_state:
+          $ref: '#/components/schemas/FieldResponse/properties/field_state'
+        intent:
+          type: string
+        constraints:
+          type: object
+    CollapseResponse:
       type: object
       properties:
         winner:
           type: string
+          nullable: true
         text:
           type: string
         scorecard:
@@ -225,3 +359,46 @@ components:
           type: array
           items:
             type: string
+    ActRequest:
+      type: object
+      properties:
+        text:
+          type: string
+        field_state:
+          $ref: '#/components/schemas/FieldResponse/properties/field_state'
+        mode:
+          type: string
+    ActResponse:
+      type: object
+      properties:
+        voice:
+          type: string
+        avatar:
+          type: string
+        task:
+          type: string
+    MemoryRequest:
+      type: object
+      properties:
+        event:
+          type: object
+      required: [event]
+    OkResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required: [ok]
+    PatchRequest:
+      type: object
+      properties:
+        patch:
+          type: string
+      required: [patch]
+    PatchResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        tests:
+          type: object
