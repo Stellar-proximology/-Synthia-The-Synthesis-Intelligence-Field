@@ -146,29 +146,24 @@ components:
           type: array
           items:
             type: object
-            properties:
-              pair:
-                type: array
-                items:
-                  type: string
-              type:
-                type: string
-              orb:
-                type: number
         phase:
           type: string
         confidence:
           type: number
-      required: [field_state]
-    InferRequest:
+    FieldState:
       type: object
       properties:
-        context:
+        zodiac:
           type: string
-        field_state:
-          $ref: '#/components/schemas/FieldResponse/properties/field_state'
-      required: [context]
-    Candidate:
+        gates:
+          type: array
+          items:
+            type: string
+        ctb:
+          type: array
+          items:
+            type: integer
+    NodeCandidate:
       type: object
       properties:
         node:
@@ -203,6 +198,8 @@ components:
       properties:
         winner:
           type: string
+        text:
+          type: string
         scorecard:
           type: array
           items:
@@ -218,46 +215,3 @@ components:
           type: array
           items:
             type: string
-    ActRequest:
-      type: object
-      properties:
-        text:
-          type: string
-        field_state:
-          $ref: '#/components/schemas/FieldResponse/properties/field_state'
-        mode:
-          type: string
-    ActResponse:
-      type: object
-      properties:
-        voice:
-          type: string
-        avatar:
-          type: string
-        task:
-          type: string
-    MemoryRequest:
-      type: object
-      properties:
-        event:
-          type: object
-      required: [event]
-    OkResponse:
-      type: object
-      properties:
-        ok:
-          type: boolean
-      required: [ok]
-    PatchRequest:
-      type: object
-      properties:
-        patch:
-          type: string
-      required: [patch]
-    PatchResponse:
-      type: object
-      properties:
-        ok:
-          type: boolean
-        tests:
-          type: object
