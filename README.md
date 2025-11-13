@@ -65,6 +65,28 @@ echo "Hello TinyLlama" | python ultimate_assistant.py chat --max-tokens 200
 > All three commands (`build`, `oracle`, `chat`) now tunnel through `assistant_core.py`,
 > ensuring that the CLI, API, and any automation scripts reuse the exact same orchestration logic.
 
+### "Unverified"? Here is how to rerun the full flow
+
+If you already ran the assistant once but your submission shows up as **Unverified**, just
+rerun the orchestration in the exact order below. Every command is idempotent and
+pipe-friendly, so you can copy/paste the block or run the lines one at a time:
+
+```bash
+# 1. Rebuild the generated assets
+python ultimate_assistant.py build
+
+# 2. Verify any gates/lines or punctuation that need to accompany the submission
+python ultimate_assistant.py oracle "22.3" --json
+
+# 3. Capture a TinyLlama explanation to attach to your resubmission
+echo "Summarize gate 22.3 for the verifier" | python ultimate_assistant.py chat --max-tokens 256
+```
+
+If you prefer HTTP, the exact same trio of calls is available via `assistant_api.py` – the
+`/build`, `/oracle`, and `/chat` endpoints all point to the shared `assistant_core` helpers.
+The moment those three steps succeed again your resubmission will include everything the
+verifier expects, eliminating the "unverified" status.
+
 ### Unified API surface
 
 `assistant_api.py` exposes `/build`, `/oracle`, **and now `/chat`**. Each endpoint relies
