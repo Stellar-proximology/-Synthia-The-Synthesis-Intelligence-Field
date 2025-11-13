@@ -38,7 +38,7 @@ def generate_layout(specs):
                 chart_spec = f"{module} chart data:\n" + "\n".join([f"{p[0]}: {p[1]}" for p in spec["pairs"]])
                 layout["files"][f"charts/{module}_spec.txt"] = chart_spec
 
-            elif spec.get("intents"):
+            if spec.get("intents"):
                 layout["folders"].append("store")
                 store_template = env.get_template("store.html.j2")
                 logic_template = env.get_template("store_logic.py.j2")
