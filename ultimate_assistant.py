@@ -12,6 +12,8 @@ import json
 import sys
 from typing import Dict, Any, Optional
 
+from assistant_core import ChatInitializationError, chat as core_chat
+
 try:
     from builder_engine import run_builder
 except ImportError:
@@ -156,6 +158,7 @@ Examples:
   %(prog)s oracle "22.3"            # Decode gate.line
   %(prog)s oracle "22.3" --json     # JSON output
   %(prog)s oracle "text" --gate-line "22.3"  # Explicit gate.line
+  %(prog)s chat "Hello"             # TinyLlama chat (stdin supported)
         """
     )
     
@@ -192,7 +195,51 @@ Examples:
     )
     oracle.set_defaults(func=_cmd_oracle)
 
+    # Chat command
+    chat_parser = subparsers.add_parser(
+        "chat",
+        help="Chat with the TinyLlama model via assistant_core",
+    )
+    chat_parser.add_argument(
+        "prompt",
+        nargs="?",
+        help="Prompt text. If omitted, stdin is read instead.",
+    )
+    chat_parser.add_argument(
+        "--max-tokens",
+        type=int,
+        default=128,
+        help="Maximum number of tokens to generate (default: 128)",
+    )
+    chat_parser.set_defaults(func=_cmd_chat)
+
     return parser
+
+
+def _cmd_chat(args: argparse.Namespace) -> None:
+    """Invoke the shared TinyLlama chat orchestrator."""
+
+    prompt = (args.prompt or "").strip()
+    if not prompt:
+        prompt = sys.stdin.read().strip()
+
+    if not prompt:
+        print("Error: provide a prompt argument or pipe input via stdin.", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        response = core_chat(prompt, args.max_tokens)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
+    except ChatInitializationError as exc:
+        print(f"Initialization error: {exc}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as exc:
+        print(f"Unexpected TinyLlama error: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    print(response)
 
 
 def main() -> None:

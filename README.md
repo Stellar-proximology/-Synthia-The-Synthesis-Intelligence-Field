@@ -50,11 +50,27 @@ Use `build` to process files in `uploads/` and generate an app skeleton:
 python ultimate_assistant.py build
 ```
 
-Or decode punctuation and gate.line information with the oracle tools:
+Decode punctuation and gate.line information with the oracle tools:
 
 ```bash
 python ultimate_assistant.py oracle "Psalm 23:1;" --gate-line 22.3
 ```
+
+Or chat with the local TinyLlama weights through the same orchestrator:
+
+```bash
+echo "Hello TinyLlama" | python ultimate_assistant.py chat --max-tokens 200
+```
+
+> All three commands (`build`, `oracle`, `chat`) now tunnel through `assistant_core.py`,
+> ensuring that the CLI, API, and any automation scripts reuse the exact same orchestration logic.
+
+### Unified API surface
+
+`assistant_api.py` exposes `/build`, `/oracle`, **and now `/chat`**. Each endpoint relies
+on the shared `assistant_core` functions, so the HTTP interface mirrors the CLI behavior
+— even the TinyLlama chat reuses the same request schema used by the new CLI sub-command.
+Pass `stream=true` to `/chat` if you want a token stream instead of a single string.
 
 ---
 

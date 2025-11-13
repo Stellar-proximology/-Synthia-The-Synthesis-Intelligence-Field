@@ -1,8 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
-from assistant_core import build as core_build, decode
+from fastapi.responses import StreamingResponse
+
+from assistant_core import ChatInitializationError, build as core_build, chat as core_chat, decode
 
 app = FastAPI(title="Synthia Assistant")
 
@@ -35,3 +37,24 @@ def build(req: BuildRequest):
 def oracle(req: OracleRequest):
     """Decode punctuation and optionally a specific Gate.Line."""
     return decode(req.text, req.gate_line)
+
+
+@app.post("/chat")
+def chat(req: ChatRequest, stream: bool = False):
+    """Generate TinyLlama responses that mirror the CLI contract."""
+
+    try:
+        response_text = core_chat(req.prompt, req.max_tokens)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except ChatInitializationError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    if stream:
+        def token_stream():
+            for token in response_text.split():
+                yield token + " "
+
+        return StreamingResponse(token_stream(), media_type="text/plain")
+
+    return {"response": response_text}
