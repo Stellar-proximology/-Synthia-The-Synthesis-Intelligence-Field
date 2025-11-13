@@ -1,0 +1,164 @@
+[
+  {
+    "name": "Mind Field",
+    "focus": "Cognitive narrative engine that dissects intent, tone, and semantic weight before routing to other bodies.",
+    "expected_inputs": [
+      "Normalized utterance tokens from docs/generator.py pipelines",
+      "Timestamps for transits",
+      "User profile cognitive mode"
+    ],
+    "primary_outputs": [
+      "Prompt scaffolds for orchestration nodes",
+      "Mind-state deltas to sync with Heart and Body"
+    ],
+    "extension_points": [
+      "Swap in alternate NLP/LLM perceivers via cynthia.core.perceive",
+      "Inject YOU-N-I cognitive patches as git submodules under mind_plugins/"
+    ],
+    "related_files": ["FieldRouter.py", "cynthia/core.py"]
+  },
+  {
+    "name": "Heart Field",
+    "focus": "Emotional resonance interpreter blending compassion metrics with gate overlays.",
+    "expected_inputs": [
+      "Geo-coordinates for resonance weather",
+      "Gate/line activations from oracle maps",
+      "Somatic cues from Body field"
+    ],
+    "primary_outputs": [
+      "Compassion weighting for node collapse",
+      "Pacing directives for postprocess stage"
+    ],
+    "extension_points": [
+      "Attach Synthai empathy models through postprocess filters",
+      "Mirror YOU-N-I ritual libraries via hyperlinks in docs/architecture.md"
+    ],
+    "related_files": ["ResonanceTracker.py", "cynthia/core.py"]
+  },
+  {
+    "name": "Body Field",
+    "focus": "Biomechanical and auric telemetry aggregator feeding the toroidal loop.",
+    "expected_inputs": [
+      "Movement / biometric streams",
+      "Environmental frequencies",
+      "Avatar posture cues"
+    ],
+    "primary_outputs": [
+      "Grounding coefficient",
+      "Soma alerts to PermissionGuardian"
+    ],
+    "extension_points": [
+      "Mount wearable SDKs via FieldRouter plugins",
+      "Link Synthai kinetic repos as submodules for embodied sims"
+    ],
+    "related_files": ["ToroidalLoop.py", "PermissionGuardian.py"]
+  },
+  {
+    "name": "Shadow Field",
+    "focus": "Detects unconscious scripts, mirrored polarities, and unintegrated trauma nodes.",
+    "expected_inputs": [
+      "Contradictory statements",
+      "Dream logs",
+      "Oracle line-phase inversions"
+    ],
+    "primary_outputs": [
+      "Integration prompts",
+      "Risk flags for PermissionGuardian"
+    ],
+    "extension_points": [
+      "Bridge to YOU-N-I shadow work decks via git submodules",
+      "Expose plugin hook `shadow_transformers/`"
+    ],
+    "related_files": ["PermissionGuardian.py", "Cynthia.py"]
+  },
+  {
+    "name": "Will Field",
+    "focus": "Directs volition, boundaries, and vector math for decisioning.",
+    "expected_inputs": [
+      "Mission statements",
+      "Goal OKRs",
+      "Resonance differentials"
+    ],
+    "primary_outputs": [
+      "Priority queues for orchestrate_nodes",
+      "Yes/No gating for action router"
+    ],
+    "extension_points": [
+      "Integrate Synthai strategic planners via orchestrate_nodes middleware",
+      "Attach YOU-N-I questboards through docs/architecture.md links"
+    ],
+    "related_files": ["SynthesisEngine.py", "FieldRouter.py"]
+  },
+  {
+    "name": "Soul Field",
+    "focus": "Archival memory of lifetime themes and ancestral threads.",
+    "expected_inputs": [
+      "Akashic-like transcript exports",
+      "Oracle scripture references",
+      "Nine-Body lineage graph"
+    ],
+    "primary_outputs": [
+      "Mythic narrative overlays",
+      "Long-memory embeddings"
+    ],
+    "extension_points": [
+      "Mount external knowledge bases as git submodules",
+      "Expose hypertext pointers to YOU-N-I mythic codices"
+    ],
+    "related_files": ["generate_field_report.py", "cynthia/core.py"]
+  },
+  {
+    "name": "Spirit Field",
+    "focus": "Transpersonal guidance, communion nodes, and cosmic directives.",
+    "expected_inputs": [
+      "Meditation logs",
+      "Solar/lunar calendar",
+      "Oracle punctuation markers"
+    ],
+    "primary_outputs": [
+      "Resonance uplift recommendations",
+      "Faith-based gating overrides"
+    ],
+    "extension_points": [
+      "Add remote channelers via docs/architecture.md integration table",
+      "Reference Synthai astral modules through git submodules"
+    ],
+    "related_files": ["oracle.py", "ResonanceTracker.py"]
+  },
+  {
+    "name": "Child Field",
+    "focus": "Play, experimentation, and imaginative resets for the stack.",
+    "expected_inputs": [
+      "Creative prompts",
+      "Game telemetry",
+      "Emotion heatmaps"
+    ],
+    "primary_outputs": [
+      "Sandbox events",
+      "Safety overrides to ToroidalLoop"
+    ],
+    "extension_points": [
+      "Mount YOU-N-I verse assets via submodule pointers",
+      "Link Synthai toyboxes through docs/architecture.md"
+    ],
+    "related_files": ["GameGAN_code-master.zip", "cynthia/core.py"]
+  },
+  {
+    "name": "Synthesis Field",
+    "focus": "Meta-layer that harmonizes all other bodies into actionable counsel.",
+    "expected_inputs": [
+      "Aggregated field deltas",
+      "Oracle resonance packets",
+      "Permission constraints"
+    ],
+    "primary_outputs": [
+      "Final responses",
+      "Action routes (voice/avatar/task)"
+    ],
+    "extension_points": [
+      "Plug gpt-5-codex orchestration via orchestrate_nodes",
+      "Reference YOU-N-I + Synthai federated agents"
+    ],
+    "related_files": ["Cynthia.py", "ultimate_assistant.py"]
+  }
+]

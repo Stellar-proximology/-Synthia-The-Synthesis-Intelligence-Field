@@ -1,0 +1,9 @@
+Module: ResonanceGates
+- Gate 22 (docs/architecture.md#oracle--resonance-gates) at 0.91
+- Gate 36 (docs/architecture.md#oracle--resonance-gates) at 0.84
+- Punctuation Channel (docs/architecture.md#oracle--resonance-gates) at 0.77
+
+Module: ModuleResponsibilities
+architect assigns FieldRouter with 144 credits
+architect assigns SynthesisEngine with 233 credits
+architect assigns ResonanceTracker with 188 credits
