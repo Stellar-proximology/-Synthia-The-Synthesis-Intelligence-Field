@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, jsonify, render_template_string
-from universe_builder.builder_engine import build_from_uploads
+from builder_engine import run_builder
 
 app = Flask(__name__)
 
@@ -18,7 +18,7 @@ def home():
 
 @app.route("/build", methods=["POST", "GET"])
 def build():
-    build_from_uploads()
+    run_builder()
     return "✅ Builder ran successfully."
 
 @app.route("/preview")
