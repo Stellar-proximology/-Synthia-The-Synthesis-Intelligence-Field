@@ -55,3 +55,20 @@ Or decode punctuation and gate.line information with the oracle tools:
 ```bash
 python ultimate_assistant.py oracle "Psalm 23:1;" --gate-line 22.3
 ```
+
+---
+
+## 📦 Deploying the static UI to Vercel
+
+The repository ships with `index.html`, a fully self-contained interface that can be
+hosted as a static site. Vercel will not detect a framework automatically because the
+project is Python-first, so add the provided `vercel.json` (already committed) and
+deploy using the static builder:
+
+1. Install the Vercel CLI and log in: `npm i -g vercel && vercel login`.
+2. From the repo root run `vercel --prod`. The CLI will read `vercel.json`, upload the
+   standalone `index.html`, and wire every incoming route back to that file.
+
+This setup ensures the single-page experience works without a Node/Next.js build step,
+keeping the deployment lightweight while the heavier Python assistants continue to run
+locally or in a separate service.

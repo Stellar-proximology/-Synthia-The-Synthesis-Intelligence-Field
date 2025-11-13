@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "name": "you-n-i-de-studio2",
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
