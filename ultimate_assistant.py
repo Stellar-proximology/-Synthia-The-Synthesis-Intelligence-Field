@@ -9,10 +9,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple, TYPE_CHECKING
 
-from assistant_core import ChatInitializationError, chat as core_chat
+from assistant_core import ChatInitializationError
+
+if TYPE_CHECKING:  # pragma: no cover - import-time helper
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    import torch
 
 try:
     from builder_engine import run_builder
@@ -198,7 +203,7 @@ Examples:
     # Chat command
     chat_parser = subparsers.add_parser(
         "chat",
-        help="Chat with the TinyLlama model via assistant_core",
+        help="Chat with the TinyLlama model using cached weights",
     )
     chat_parser.add_argument(
         "prompt",
@@ -216,6 +221,73 @@ Examples:
     return parser
 
 
+_CHAT_MODEL: "AutoModelForCausalLM | None" = None
+_CHAT_TOKENIZER: "AutoTokenizer | None" = None
+_CHAT_DEVICE: "torch.device | None" = None
+_CHAT_LOAD_ERROR: Optional[ChatInitializationError] = None
+
+
+def _load_chat_stack() -> Tuple["AutoTokenizer", "AutoModelForCausalLM", "torch.device"]:
+    """Load and cache the TinyLlama tokenizer/model stack."""
+
+    global _CHAT_MODEL, _CHAT_TOKENIZER, _CHAT_DEVICE, _CHAT_LOAD_ERROR
+
+    if _CHAT_MODEL is not None and _CHAT_TOKENIZER is not None and _CHAT_DEVICE is not None:
+        return _CHAT_TOKENIZER, _CHAT_MODEL, _CHAT_DEVICE
+
+    if _CHAT_LOAD_ERROR is not None:
+        raise _CHAT_LOAD_ERROR
+
+    try:
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+    except ImportError as exc:  # pragma: no cover - environment specific
+        _CHAT_LOAD_ERROR = ChatInitializationError(
+            "TinyLlama chat requires the 'torch' and 'transformers' packages."
+        )
+        raise _CHAT_LOAD_ERROR from exc
+
+    model_path = os.environ.get("TINY_LLAMA_PATH")
+    if not model_path:
+        _CHAT_LOAD_ERROR = ChatInitializationError(
+            "TINY_LLAMA_PATH is not set. Download the TinyLlama weights and set the "
+            "environment variable to their directory."
+        )
+        raise _CHAT_LOAD_ERROR
+
+    dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+    tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path, torch_dtype=dtype, local_files_only=True
+    )
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+
+    _CHAT_MODEL = model
+    _CHAT_TOKENIZER = tokenizer
+    _CHAT_DEVICE = device
+    return tokenizer, model, device
+
+
+def handle_chat(prompt: str, max_tokens: int = 128) -> str:
+    """Generate a TinyLlama response using cached tokenizer/model objects."""
+
+    prompt = (prompt or "").strip()
+    if not prompt:
+        raise ValueError("Prompt cannot be empty.")
+
+    tokenizer, model, device = _load_chat_stack()
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=max(1, max_tokens),
+        do_sample=True,
+        temperature=0.7,
+    )
+    return tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+
 def _cmd_chat(args: argparse.Namespace) -> None:
     """Invoke the shared TinyLlama chat orchestrator."""
 
@@ -228,7 +300,7 @@ def _cmd_chat(args: argparse.Namespace) -> None:
         sys.exit(1)
 
     try:
-        response = core_chat(prompt, args.max_tokens)
+        response = handle_chat(prompt, args.max_tokens)
     except ValueError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         sys.exit(1)
