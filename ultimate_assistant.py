@@ -12,44 +12,48 @@ import json
 import sys
 from typing import Dict, Any, Optional
 
-from assistant_core import ChatInitializationError, chat as core_chat
-
-try:
-    from builder_engine import run_builder
-except ImportError:
-    print("Warning: builder_engine module not found. 'build' command will not work.", file=sys.stderr)
-    run_builder = None
-
-try:
-    from oracle import parse_punctuation, get_gate_line_info
-except ImportError:
-    print("Warning: oracle module not found. 'oracle' command will not work.", file=sys.stderr)
-    parse_punctuation = None
-    get_gate_line_info = None
+from assistant_core import (
+    ChatInitializationError,
+    build as core_build,
+    chat as core_chat,
+    decode as core_decode,
+)
 
 
-def _cmd_build(_args: argparse.Namespace) -> None:
-    """Run the universe builder on the current uploads directory."""
-    if run_builder is None:
-        print("Error: builder_engine module not available.", file=sys.stderr)
-        sys.exit(1)
-    
+def _cmd_build(args: argparse.Namespace) -> None:
+    """Run the universe builder through the shared assistant_core facade."""
+
     try:
-        run_builder()
-        print("Universe builder completed successfully.")
-    except Exception as e:
-        print(f"Error running universe builder: {e}", file=sys.stderr)
+        summary = core_build(args.uploads, args.output)
+    except Exception as exc:
+        print(f"Error running universe builder: {exc}", file=sys.stderr)
         sys.exit(1)
+
+    if args.json:
+        print(json.dumps(summary or {}, indent=2))
+        return
+
+    if not summary:
+        print("Universe builder completed with no summary payload.")
+        return
+
+    lines = [
+        "Universe builder completed successfully:",
+        f"  uploads: {summary.get('uploads', args.uploads)}",
+        f"  output: {summary.get('output', args.output)}",
+    ]
+    files = summary.get("files_written")
+    if files:
+        lines.append(f"  files_written: {', '.join(files)}")
+    folders = summary.get("folders_created")
+    if folders:
+        lines.append(f"  folders_created: {', '.join(folders)}")
+
+    print("\n".join(lines))
 
 
 def _cmd_oracle(args: argparse.Namespace) -> None:
-    """Decode punctuation or Gate.Line values from input text.
-
-    Results are printed in a human-friendly format or as JSON if --json is provided.
-    """
-    if parse_punctuation is None or get_gate_line_info is None:
-        print("Error: oracle module not available.", file=sys.stderr)
-        sys.exit(1)
+    """Decode punctuation or Gate.Line values via assistant_core.decode."""
 
     result: Dict[str, Any] = {}
 
@@ -58,54 +62,21 @@ def _cmd_oracle(args: argparse.Namespace) -> None:
         result["error"] = "Input text cannot be empty."
     else:
         input_text = args.input.strip()
-        
-        # Punctuation resonance
-        try:
-            punct = parse_punctuation(input_text)
-            if punct:
-                result["punctuation"] = punct
-        except Exception as e:
-            result["punctuation_error"] = f"Error parsing punctuation: {e}"
 
-        # Gate.Line – explicit via flag or inferred from the input string
         gate_line = args.gate_line
         if not gate_line and "." in input_text:
-            # Try to extract gate.line from input
+            # Try to extract gate.line from input automatically
             parts = input_text.split(".")
             if len(parts) >= 2:
-                # Handle cases like "Gate 22.3" or just "22.3"
                 potential_gate = parts[-2].split()[-1] if parts[-2] else ""
                 potential_line = parts[-1].split()[0] if parts[-1] else ""
-                
                 if potential_gate.isdigit() and potential_line.isdigit():
                     gate_line = f"{potential_gate}.{potential_line}"
 
-        if gate_line:
-            try:
-                parts = gate_line.split(".")
-                if len(parts) != 2:
-                    result["gate_line_error"] = "Invalid gate.line format; expected 'gate.line' (e.g., '22.3')."
-                else:
-                    gate_str, line_str = parts[0].strip(), parts[1].strip()
-                    if not (gate_str.isdigit() and line_str.isdigit()):
-                        result["gate_line_error"] = "Invalid gate.line format; expected numeric values."
-                    else:
-                        gate, line = int(gate_str), int(line_str)
-                        # Validate ranges (assuming Human Design gates 1-64, lines 1-6)
-                        if not (1 <= gate <= 64):
-                            result["gate_line_error"] = f"Gate {gate} out of range (1-64)."
-                        elif not (1 <= line <= 6):
-                            result["gate_line_error"] = f"Line {line} out of range (1-6)."
-                        else:
-                            gate_info = get_gate_line_info(gate, line)
-                            if gate_info:
-                                result["gate_line"] = gate_info
-                            else:
-                                result["gate_line_error"] = f"No information found for Gate {gate}.{line}."
-            except ValueError as e:
-                result["gate_line_error"] = f"Error parsing gate.line: {e}"
-            except Exception as e:
-                result["gate_line_error"] = f"Error retrieving gate.line info: {e}"
+        try:
+            result = core_decode(input_text, gate_line)
+        except Exception as exc:
+            result["error"] = f"Error decoding input: {exc}"
 
     # Output results
     if args.json:
@@ -114,7 +85,7 @@ def _cmd_oracle(args: argparse.Namespace) -> None:
 
     # Human-readable output
     output_sections = []
-    
+
     if "punctuation" in result:
         lines = ["Punctuation decoding:"]
         for symbol, meaning in result["punctuation"].items():
@@ -131,14 +102,8 @@ def _cmd_oracle(args: argparse.Namespace) -> None:
             lines.append(f"  {gate_info}")
         output_sections.append("\n".join(lines))
 
-    # Print any errors
-    errors = []
-    for key in ["error", "punctuation_error", "gate_line_error"]:
-        if key in result:
-            errors.append(f"Error: {result[key]}")
-    
-    if errors:
-        output_sections.extend(errors)
+    if "error" in result and not output_sections:
+        output_sections.append(f"Error: {result['error']}")
 
     if output_sections:
         print("\n\n".join(output_sections))
@@ -170,8 +135,23 @@ Examples:
 
     # Build command
     build = subparsers.add_parser(
-        "build", 
+        "build",
         help="Run the universe builder on the uploads directory"
+    )
+    build.add_argument(
+        "--uploads",
+        default="uploads",
+        help="Directory containing uploaded specs (default: uploads)",
+    )
+    build.add_argument(
+        "--output",
+        default="generated_app",
+        help="Directory where the generated app is written (default: generated_app)",
+    )
+    build.add_argument(
+        "--json",
+        action="store_true",
+        help="Print the builder summary as JSON",
     )
     build.set_defaults(func=_cmd_build)
 

@@ -50,6 +50,13 @@ Use `build` to process files in `uploads/` and generate an app skeleton:
 python ultimate_assistant.py build
 ```
 
+Need to point the builder at a different pair of directories or capture machine-readable output?
+Use the optional flags that mirror the shared `assistant_core.build` helper:
+
+```bash
+python ultimate_assistant.py build --uploads path/to/specs --output dist/app --json
+```
+
 Decode punctuation and gate.line information with the oracle tools:
 
 ```bash
