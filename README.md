@@ -40,6 +40,10 @@ pip install -r requirements.txt
 
 2. **Run the unified command-line assistant**
 
+> 👉 `ultimate_assistant.py` is now the sole CLI entry point. The legacy
+> `synthia_assistant.py` launcher has been retired, so update any scripts or
+> aliases to call the unified tool directly.
+
 ```bash
 python ultimate_assistant.py --help
 ```
